@@ -14,7 +14,7 @@
                 "isDefault": true
             },
             "windows": {
-                "command": "Remove-Item -Recurse -Path '${workspaceFolder}\\bin\\*'; c++ -o '${workspaceFolder}\\bin\\rush.exe' (Get-ChildItem -Path '${workspaceFolder}\\src\\' -Recurse | Select-Object -ExpandProperty FullName)",
+                "command": "Remove-Item -Recurse -Path '${workspaceFolder}\\bin\\*'; c++ -std=c++11 -o '${workspaceFolder}\\bin\\rush.exe' (Get-ChildItem -Path '${workspaceFolder}\\src\\' -Recurse | Select-Object -ExpandProperty FullName)",
             }
         }
     ]
