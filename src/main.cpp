@@ -4,21 +4,11 @@
 #include <cstring>
 #include <cstdio>
 
-char const *const tmpPath = "rush_tmp.cpp";
-
-void compile(void)
-{
-    char command[1024];
-
-    strcpy(command, "c++ -o rush_output.exe ");
-    strcat(command, tmpPath);
-
-    system(command);
-}
+#define TMP_PATH "rush_tmp.cpp"
 
 int main(int argc, char *argv[])
 {
-    std::ofstream tmpFile(tmpPath);
+    std::ofstream tmpFile(TMP_PATH);
 
     if (tmpFile.is_open())
     {
@@ -38,8 +28,8 @@ int main(int argc, char *argv[])
         }
 
         tmpFile.close();
-        compile();
-        remove(tmpPath);
+        system("c++ -o rush_output.exe " TMP_PATH);
+        remove(TMP_PATH);
     }
 
     return 0;
