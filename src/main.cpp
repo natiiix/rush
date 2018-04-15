@@ -1,13 +1,27 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <algorithm>
+#include <regex>
 #include <fstream>
+#include <sstream>
 #include <cstring>
 #include <cstdio>
+#include "support.hpp"
 
-#define TMP_PATH "rush_tmp.cpp"
+using namespace support;
 
-int main(int argc, char *argv[])
+#define TMP_PATH "__rush_temp.cpp"
+
+int main(const int argc, const char *const argv[])
 {
+    // Not enough arguments
+    if (argc < 3)
+    {
+        std::cout << "Expected syntax: rush <Output File> <Source Files>" << std::endl;
+        return -1;
+    }
+
     // Open the temporary file
     std::ofstream tmpFile(TMP_PATH);
 
@@ -18,14 +32,16 @@ int main(int argc, char *argv[])
     }
 
     // Iterate through the source files
-    for (int i = 1; i < argc; i++)
+    for (int i = 2; i < argc; i++)
     {
-        std::cout << "Reading source file: " << argv[i] << std::endl;
-        std::ifstream sourceFile(argv[i]);
+        const char *fileName = argv[i];
+
+        std::cout << "Reading source file: " << fileName << std::endl;
+        std::ifstream sourceFile(fileName);
 
         if (!sourceFile.is_open())
         {
-            std::cerr << "Unable to read source file \"" << argv[1] << "\"!" << std::endl;
+            std::cerr << "Unable to read source file \"" << fileName << "\"!" << std::endl;
             continue;
         }
 
@@ -42,7 +58,12 @@ int main(int argc, char *argv[])
     tmpFile.close();
 
     // Compile the temporary file
-    if (system("c++ -o rush_output.exe " TMP_PATH))
+    std::string compileCmd("c++ -o ");
+    compileCmd += argv[1];
+    compileCmd += " ";
+    compileCmd += TMP_PATH;
+
+    if (system(compileCmd.c_str()))
     {
         return -1;
     }
