@@ -1,15 +1,9 @@
 #include <iostream>
 #include <string>
-#include <vector>
-#include <algorithm>
 #include <regex>
 #include <fstream>
-#include <sstream>
 #include <cstring>
 #include <cstdio>
-#include "support.hpp"
-
-using namespace support;
 
 #define TMP_PATH "__rush_temp.cpp"
 
