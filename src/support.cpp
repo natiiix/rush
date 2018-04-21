@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "support.hpp"
 
 namespace support
@@ -10,7 +11,17 @@ void printLn(const char *const str)
 
 void printLn(const std::string str)
 {
-    std::cout << str << std::endl;
+    printLn(str.c_str());
+}
+
+void printLnErr(const char *const str)
+{
+    std::cerr << "ERROR: " << str << std::endl;
+}
+
+void printLnErr(const std::string str)
+{
+    printLnErr(str.c_str());
 }
 
 std::vector<RegexMatch> getAllMatches(const std::regex reg, const std::string str)
@@ -24,6 +35,11 @@ std::vector<RegexMatch> getAllMatches(const std::regex reg, const std::string st
     }
 
     return matches;
+}
+
+std::vector<RegexMatch> getAllMatches(const std::string reg, const std::string str)
+{
+    return getAllMatches(std::regex(reg), str);
 }
 
 bool isWhitespace(const char c)
@@ -51,5 +67,28 @@ std::string trimWhitespace(const std::string input, int &leadingSpaces)
 
     leadingSpaces = leading;
     return input.substr(leading, input.size() - leading - trailing);
+}
+
+// Source: https://stackoverflow.com/a/2602258/3043260
+std::string readFile(const char *const path)
+{
+    std::ifstream reader(path);
+
+    if (!reader.is_open())
+    {
+        return std::string();
+    }
+
+    reader.seekg(0, std::ios::end);
+
+    size_t size = reader.tellg();
+    std::string buffer(size, ' ');
+
+    reader.seekg(0);
+
+    reader.read(&buffer[0], size);
+    reader.close();
+
+    return buffer;
 }
 }
