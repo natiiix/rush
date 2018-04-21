@@ -1,11 +1,8 @@
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <string>
-#include <regex>
-#include <cstring>
-#include <cstdio>
 #include "support.hpp"
+#include "compiler.hpp"
 
 using namespace support;
 
@@ -78,13 +75,8 @@ int main(const int argc, const char *const argv[])
         }
     }
 
-    // TODO: Process the source file
-    std::stringstream tempCode;
-
-    for (std::string code : sourceFiles)
-    {
-        tempCode << code << std::endl;
-    }
+    // Compile the source files into temporary code
+    std::string tempCode = compile(sourceFiles);
 
     // Open the temporary file
     std::ofstream tmpFile(TMP_PATH);
@@ -97,7 +89,7 @@ int main(const int argc, const char *const argv[])
     }
 
     // Write the temporary code to the temporary file
-    tmpFile << tempCode.rdbuf();
+    tmpFile << tempCode;
 
     // Close the temporary file
     tmpFile.close();
