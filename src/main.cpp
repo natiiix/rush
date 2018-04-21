@@ -10,42 +10,6 @@ using namespace support;
 
 int main(const int argc, const char *const argv[])
 {
-    // std::string str("Hello <Tag> World! <AnotherTag> Ooops! <ThirdTag>");
-    // // std::smatch mr;
-    // std::regex reg("<(\\w+)>");
-
-    // std::vector<RegexMatch> matches = getAllMatches(reg, str);
-
-    // // if (std::regex_search(str, mr, reg))
-    // // {
-    // //     printLn("Match!");
-    // // }
-    // // else
-    // // {
-    // //     printLn("Not a match!");
-    // // }
-
-    // std::cout << "Found " << matches.size() << " matches!" << std::endl;
-
-    // int n = 0;
-    // for (RegexMatch mr : matches)
-    // {
-    //     std::cout << "-- Match number " << ++n << std::endl;
-
-    //     std::cout
-    //         << "Empty: " << mr.empty()
-    //         << " Size: " << mr.size()
-    //         << " Prefix: " << mr.prefix()
-    //         << " Suffix: " << mr.suffix()
-    //         << " Length: " << mr.length()
-    //         << " Position: " << mr.position()
-    //         << " Str: " << mr.str() << std::endl;
-
-    //     std::for_each(mr.begin(), mr.end(), [](const std::string x) -> void { printLn(x); });
-    // }
-
-    // return 0;
-
     // Not enough arguments
     if (argc < 3)
     {
