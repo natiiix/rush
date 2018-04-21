@@ -1,9 +1,8 @@
 #include "CodeLine.hpp"
 #include "support.hpp"
 
-CodeLine::CodeLine(const std::string line)
+CodeLine::CodeLine(const std::string code, const int indentation) : m_code(code), m_indentation(indentation)
 {
-    m_code = support::trimWhitespace(line, m_indentation);
 }
 
 const int CodeLine::indentation() const

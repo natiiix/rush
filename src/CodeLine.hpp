@@ -5,7 +5,7 @@
 class CodeLine
 {
 public:
-  CodeLine(const std::string line);
+  CodeLine(const std::string code, const int indentation);
 
   const int indentation() const;
   const std::string code() const;
