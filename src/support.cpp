@@ -142,20 +142,45 @@ std::vector<std::string> split(const std::string str, const std::string delimite
 }
 
 // Source: https://stackoverflow.com/a/1430774/3043260
-std::string join(const std::string delimiter, const std::vector<std::string> values)
+std::string join(const std::string separator, const std::vector<std::string> values, const bool trailingSeparator)
 {
     std::stringstream ss;
 
-    for (size_t i = 0; i < values.size(); ++i)
+    for (size_t i = 0; i < values.size(); i++)
     {
-        if (i)
-        {
-            ss << delimiter;
-        }
-
         ss << values[i];
+
+        if (trailingSeparator || i + 1 < values.size())
+        {
+            ss << separator;
+        }
     }
 
     return ss.str();
+}
+
+int findUnescaped(const std::string str, const char value, const int start)
+{
+    bool escaped = false;
+
+    for (int i = start; i < str.size(); i++)
+    {
+        char c = str[i];
+
+        if (escaped)
+        {
+            escaped = false;
+        }
+        else if (c == value)
+        {
+            return i;
+        }
+        else if (c == '\\')
+        {
+            escaped = true;
+        }
+    }
+
+    return -1;
 }
 }

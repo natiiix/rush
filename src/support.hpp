@@ -20,7 +20,8 @@ std::string readFile(const char *const path);
 void replaceAllInPlace(std::string &str, const std::string &from, const std::string &to);
 std::string replaceAll(const std::string &str, const std::string &from, const std::string &to);
 std::vector<std::string> split(const std::string str, const std::string delimiter);
-std::string join(const std::string delimiter, const std::vector<std::string> values);
+std::string join(const std::string separator, const std::vector<std::string> values, const bool trailingSeparator = false);
+int findUnescaped(const std::string str, const char value, const int start = 0);
 
 template <class T, class U, class F>
 void map(const std::vector<T> src, std::vector<U> &dest, const F f)
