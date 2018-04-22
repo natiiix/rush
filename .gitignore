@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Binary output directory
+bin/
+
+# VSCode settings file
+.vscode/settings.json
