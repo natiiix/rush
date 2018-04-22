@@ -40,12 +40,19 @@ int main(const int argc, const char *const argv[])
     }
 
     // Compile the source files into temporary code
-    std::string tempCode = compile(sourceFiles);
+    Compiler comp(sourceFiles);
+    std::string tempCode = comp.compile();
+
+    // Compile error occurred
+    if (tempCode.empty())
+    {
+        return -1;
+    }
 
     // Open the temporary file
     std::ofstream tmpFile(TMP_PATH);
 
-    // Unable to open the temporary file
+    // Check if the temporary file has been correctly opened
     if (!tmpFile.is_open())
     {
         printLnErr("Unable to create a temporary file");
@@ -73,11 +80,11 @@ int main(const int argc, const char *const argv[])
     }
 
     // Delete the temporary file
-    if (remove(TMP_PATH))
-    {
-        printLnErr("Unable to delete the temporary file");
-        return -1;
-    }
+    // if (remove(TMP_PATH))
+    // {
+    //     printLnErr("Unable to delete the temporary file");
+    //     return -1;
+    // }
 
     // Everything worked correctly
     printLn("OK");
