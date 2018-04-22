@@ -2,5 +2,14 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
-std::string compile(const std::vector<std::string> sourceFiles);
+class Compiler
+{
+  public:
+    Compiler(const std::vector<std::string> sourceFiles);
+    std::string compile(void) const;
+
+  private:
+    std::string m_originalCode;
+};
