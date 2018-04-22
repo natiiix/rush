@@ -79,80 +79,85 @@ std::string replaceAt(const std::string str, const int start, const int length, 
 
 std::string Compiler::compile(void) const
 {
-    // std::map<std::string, Literal> literals;
-    // std::string inCode = m_originalCode;
+    std::map<std::string, Literal> literals;
+    std::string inCode = m_originalCode;
 
-    // // Remove carriage returns
-    // replaceAllInPlace(inCode, "\r\n", "\n");
+    // Remove carriage returns
+    replaceAllInPlace(inCode, "\r\n", "\n");
 
-    // // Remove escaped newlines
-    // replaceAllInPlace(inCode, "\\\n", "");
+    // Remove escaped newlines
+    replaceAllInPlace(inCode, "\\\n", "");
 
-    // // Replace string literals
-    // {
-    //     int start;
-    //     while ((start = findUnescaped(inCode, '"')) >= 0)
-    //     {
-    //         int end = findUnescaped(inCode, '"', start + 1);
+    // Escape double quotes in character literals
+    replaceAllInPlace(inCode, "'\"'", "'\\\"'");
 
-    //         if (end < 0)
-    //         {
-    //             err() << "Unterminated string literal" << std::endl;
-    //             return std::string();
-    //         }
+    // Replace string literals
+    {
+        int start;
+        while ((start = findUnescaped(inCode, '"')) >= 0)
+        {
+            int end = findUnescaped(inCode, '"', start + 1);
 
-    //         std::string value = inCode.substr(start, end - start + 1);
-    //         std::string name = addLiteral(literals, Literal(value, LiteralType::String));
-    //         replaceAllInPlace(inCode, value, name);
-    //     }
-    // }
+            if (end < 0)
+            {
+                err() << "Unterminated string literal" << std::endl;
+                return std::string();
+            }
 
-    // // Replace numeric literals
-    // // Note 1: The RegEx does not match the '-' character in front of negative numbers
-    // // to avoid accidentally matching the subtraction operator
-    // // Note 2: "\x" is not used to match hexadecimal digits because the GCC std::regex does not support it
-    // int offset = 0;
-    // for (RegexMatch m : getAllMatches("\\b(?:\\d+(?:\\.\\d+)?f?|0x[0-9a-fA-F]+|0b[01]+)\\b", inCode))
-    // {
-    //     std::string name = addLiteral(literals, Literal(m.str(), LiteralType::Number));
-    //     // replaceAllInPlace(inCode, m.str(), name);
-    //     inCode = replaceAt(inCode, m.position() + offset, m.length(), name);
-    //     offset = name.size() - m.length();
-    // }
+            std::string value = inCode.substr(start, end - start + 1);
+            std::string name = addLiteral(literals, Literal(value, LiteralType::String));
+            replaceAllInPlace(inCode, value, name);
+        }
+    }
 
-    // // Generate output code
-    // std::string outCode;
-    // {
-    //     // Iterate through the lines
-    //     int idx = 0;
-    //     while (idx < inCode.size())
-    //     {
-    //         // Get the next line
-    //         std::string line = getLine(inCode, idx);
+    // Replace numeric literals
+    // Note 1: The RegEx does not match the '-' character in front of negative numbers
+    // to avoid accidentally matching the subtraction operator
+    // Note 2: "\x" is not used to match hexadecimal digits because the GCC std::regex does not support it
+    int offset = 0;
+    for (RegexMatch m : getAllMatches("\\b(?:\\d+(?:\\.\\d+)?f?|0x[0-9a-fA-F]+|0b[01]+)\\b", inCode))
+    {
+        std::string name = addLiteral(literals, Literal(m.str(), LiteralType::Number));
 
-    //         // Trim both leading and trailing whitespace and get the indentation level
-    //         int indentation = 0;
-    //         line = trimWhitespace(line, indentation);
+        // Replace the literal value by its placeholder
+        inCode = replaceAt(inCode, m.position() + offset, m.length(), name);
 
-    //         // Ignore empty lines
-    //         if (line.empty())
-    //         {
-    //             continue;
-    //         }
+        // Since the placeholders have different length from the original literal values
+        // we must compensate for this difference in the indexing by adding an ofset to all indices
+        offset += name.size() - m.length();
+    }
 
-    //         // Append the line to the output code
-    //         outCode += line;
-    //         outCode += '\n';
-    //     }
-    // }
+    // Generate output code
+    std::string outCode;
+    {
+        // Iterate through the lines
+        int idx = 0;
+        while (idx < inCode.size())
+        {
+            // Get the next line
+            std::string line = getLine(inCode, idx);
 
-    // // Put literal values back
-    // for (std::pair<std::string, Literal> lit : literals)
-    // {
-    //     replaceAllInPlace(outCode, lit.first, lit.second.value());
-    // }
+            // Trim both leading and trailing whitespace and get the indentation level
+            int indentation = 0;
+            line = trimWhitespace(line, indentation);
 
-    // return outCode;
+            // Ignore empty lines
+            if (line.empty())
+            {
+                continue;
+            }
 
-    return m_originalCode;
+            // Append the line to the output code
+            outCode += line;
+            outCode += '\n';
+        }
+    }
+
+    // Put literal values back
+    for (std::pair<std::string, Literal> lit : literals)
+    {
+        replaceAllInPlace(outCode, lit.first, lit.second.value());
+    }
+
+    return outCode;
 }
