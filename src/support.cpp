@@ -53,6 +53,7 @@ std::string trimWhitespace(const std::string input, int &indentation)
     int leading = 0;
     int trailing = 0;
 
+    // Count leading whitespace
     for (int i = 0; i < input.size() && isWhitespace(input[i]); i++)
     {
         leading++;
@@ -66,32 +67,42 @@ std::string trimWhitespace(const std::string input, int &indentation)
         return std::string();
     }
 
+    // Count trailing whitespace
     for (int i = input.size() - 1; i >= 0 && isWhitespace(input[i]); i--)
     {
         trailing++;
     }
 
+    // Return the input string stripped of whitepsace
     return input.substr(leading, input.size() - leading - trailing);
 }
 
 // Source: https://stackoverflow.com/a/2602258/3043260
 std::string readFile(const char *const path)
 {
-    std::ifstream reader(path);
+    // File must be open in binary mode for tellg() to work
+    std::ifstream reader(path, std::ifstream::binary);
 
-    if (!reader.is_open())
+    // Check if the stream is open
+    if (!reader)
     {
         return std::string();
     }
 
+    // Go to end
     reader.seekg(0, std::ios::end);
 
+    // Get the distance from the beginning of the file
     size_t size = reader.tellg();
-    std::string buffer(size, ' ');
 
-    reader.seekg(0);
+    // Go to beginning
+    reader.seekg(0, std::ios::beg);
 
+    // Create a string and copy the file contents into it
+    std::string buffer(size, '\0');
     reader.read(&buffer[0], size);
+
+    // Close the stream (optional)
     reader.close();
 
     return buffer;

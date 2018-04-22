@@ -69,6 +69,14 @@ std::string getLine(const std::string str, int &start)
     return line;
 }
 
+std::string replaceAt(const std::string str, const int start, const int length, const std::string replacement)
+{
+    std::string prefix = str.substr(0, start);
+    std::string suffix = str.substr(start + length);
+
+    return prefix + replacement + suffix;
+}
+
 std::string Compiler::compile(void) const
 {
     std::map<std::string, Literal> literals;
@@ -79,6 +87,9 @@ std::string Compiler::compile(void) const
 
     // Remove escaped newlines
     replaceAllInPlace(inCode, "\\\n", "");
+
+    // Escape double quotes in character literals
+    replaceAllInPlace(inCode, "'\"'", "'\\\"'");
 
     // Replace string literals
     {
@@ -103,10 +114,17 @@ std::string Compiler::compile(void) const
     // Note 1: The RegEx does not match the '-' character in front of negative numbers
     // to avoid accidentally matching the subtraction operator
     // Note 2: "\x" is not used to match hexadecimal digits because the GCC std::regex does not support it
+    int offset = 0;
     for (RegexMatch m : getAllMatches("\\b(?:\\d+(?:\\.\\d+)?f?|0x[0-9a-fA-F]+|0b[01]+)\\b", inCode))
     {
         std::string name = addLiteral(literals, Literal(m.str(), LiteralType::Number));
-        replaceAllInPlace(inCode, m.str(), name);
+
+        // Replace the literal value by its placeholder
+        inCode = replaceAt(inCode, m.position() + offset, m.length(), name);
+
+        // Since the placeholders have different length from the original literal values
+        // we must compensate for this difference in the indexing by adding an ofset to all indices
+        offset += name.size() - m.length();
     }
 
     // Generate output code
