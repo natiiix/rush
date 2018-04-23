@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include "support.hpp"
-#include "compiler.hpp"
+#include "Compiler.hpp"
 
 using namespace support;
 
