@@ -69,6 +69,20 @@ bool isWhitespace(const char c)
     return c == ' ' || c == '\t';
 }
 
+void _addSpace(std::string &str, bool &addSpace)
+{
+    if (addSpace)
+    {
+        // Never add spaces to the beginning of a line
+        if (str.size())
+        {
+            str += ' ';
+        }
+
+        addSpace = false;
+    }
+}
+
 std::string getCleanCode(const std::string line)
 {
     std::string cleanCode;
@@ -84,12 +98,14 @@ std::string getCleanCode(const std::string line)
         // String literal beginning / end
         if (!inChar && c == '"' && !isEscaped(line, i))
         {
+            _addSpace(cleanCode, addSpace);
             inString = !inString;
             cleanCode += '"';
         }
         // Character literal beginning / end
         else if (!inString && c == '\'' && !isEscaped(line, i))
         {
+            _addSpace(cleanCode, addSpace);
             inChar = !inChar;
             cleanCode += '\'';
         }
@@ -110,17 +126,7 @@ std::string getCleanCode(const std::string line)
         }
         else
         {
-            if (addSpace)
-            {
-                // Remove leading whitespace
-                if (cleanCode.size())
-                {
-                    cleanCode += ' ';
-                }
-
-                addSpace = false;
-            }
-
+            _addSpace(cleanCode, addSpace);
             cleanCode += c;
         }
     }
