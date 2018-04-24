@@ -10,6 +10,7 @@ namespace support
 {
 void printLn(const std::string str);
 void printLnErr(const std::string str);
+void printLnWarn(const std::string str);
 void log(const std::string str);
 void ok(void);
 std::vector<RegexMatch> getAllMatches(const std::regex reg, const std::string str);

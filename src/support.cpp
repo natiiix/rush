@@ -15,6 +15,11 @@ void printLnErr(const std::string str)
     std::cerr << "!!! ERROR: " << str << std::endl;
 }
 
+void printLnWarn(const std::string str)
+{
+    std::cerr << "*** WARNING: " << str << std::endl;
+}
+
 void log(const std::string str)
 {
     std::cout << str << " ..." << std::endl;
