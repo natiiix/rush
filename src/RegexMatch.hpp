@@ -9,6 +9,7 @@ class RegexMatch
 public:
   RegexMatch(const std::smatch m);
 
+  const bool success() const;
   const int position() const;
   const int length() const;
   const std::string str() const;
