@@ -1,21 +1,54 @@
 #include "Compiler.hpp"
 #include <iostream>
-#include <regex>
+#include <fstream>
+#include <map>
+#include <exception>
 #include "support.hpp"
 #include "CodeLine.hpp"
 #include "Literal.hpp"
 
 using namespace support;
 
-Compiler::Compiler(const std::vector<std::string> sourceFiles)
+Compiler::Compiler(const std::string mainSourcePath)
 {
-    m_originalCode = join("\n", sourceFiles);
+    loadFile(mainSourcePath);
 }
 
-std::ostream &err(void)
+void Compiler::loadFile(const std::string path)
 {
-    std::cerr << "COMPILE ERROR: ";
-    return std::cerr;
+    if (contains(m_loadedFiles, path))
+    {
+        printLnErr("File already loaded: " + path);
+        return;
+    }
+
+    printLn("Reading file: \"" + path + "\"");
+
+    m_loadedFiles.push_back(path);
+    std::ifstream file(path);
+
+    if (!file)
+    {
+        throw std::runtime_error("Unable to open file for reading");
+    }
+
+    int lineCounter = 1;
+    for (std::string line; getline(file, line);)
+    {
+        RegexMatch match = regexMatch(line, "\\w*#include \"([^\"]+)\"\\w*");
+
+        if (!match.empty())
+        {
+            loadFile(getPathRelativeTo(path, match[0]));
+            continue;
+        }
+
+        m_lines.push_back(CodeLine(path, lineCounter, line));
+        m_allCode += line + "\n";
+        lineCounter++;
+    }
+
+    printLn("File loaded: \"" + path + "\"");
 }
 
 std::string addLiteral(std::map<std::string, Literal> &literals, const Literal value)
@@ -44,11 +77,6 @@ std::string addLiteral(std::map<std::string, Literal> &literals, const Literal v
     literals[name] = value;
 
     return name;
-}
-
-void regexReplace(std::string &str, const std::string regex, const std::string replacement)
-{
-    str = std::regex_replace(str, std::regex(regex), replacement);
 }
 
 std::string getLine(const std::string str, int &start)
@@ -80,7 +108,7 @@ std::string replaceAt(const std::string str, const int start, const int length, 
 std::string Compiler::compile(void) const
 {
     std::map<std::string, Literal> literals;
-    std::string inCode = m_originalCode;
+    std::string inCode = m_allCode;
 
     // Remove carriage returns
     replaceAllInPlace(inCode, "\r\n", "\n");
@@ -100,7 +128,7 @@ std::string Compiler::compile(void) const
 
             if (end < 0)
             {
-                err() << "Unterminated string literal" << std::endl;
+                printLnErr("Unterminated string literal");
                 return std::string();
             }
 
@@ -137,9 +165,8 @@ std::string Compiler::compile(void) const
             // Get the next line
             std::string line = getLine(inCode, idx);
 
-            // Trim both leading and trailing whitespace and get the indentation level
-            int indentation = 0;
-            line = trimWhitespace(line, indentation);
+            // Trim both leading and trailing whitespace
+            line = trimWhitespace(line);
 
             // Ignore empty lines
             if (line.empty())
