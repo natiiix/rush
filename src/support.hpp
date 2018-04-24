@@ -28,6 +28,7 @@ std::string replaceAll(const std::string &str, const char from, const char to);
 std::vector<std::string> split(const std::string str, const std::string delimiter);
 std::string join(const std::string separator, const std::vector<std::string> values, const bool trailingSeparator = false);
 bool startsWith(const std::string str, const std::string value);
+bool isEscaped(const std::string str, const int index);
 int findUnescaped(const std::string str, const char value, const int start = 0);
 int indexOfFirst(const std::string str, const std::string value);
 bool contains(const std::string str, const std::string value);

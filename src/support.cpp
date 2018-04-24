@@ -228,6 +228,25 @@ std::string join(const std::string separator, const std::vector<std::string> val
     return ss.str();
 }
 
+bool isEscaped(const std::string str, const int index)
+{
+    bool escaped = false;
+
+    for (int i = index - 1; index >= 0; i--)
+    {
+        if (str[i] == '\\')
+        {
+            escaped = !escaped;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return escaped;
+}
+
 int findUnescaped(const std::string str, const char value, const int start)
 {
     bool escaped = false;
