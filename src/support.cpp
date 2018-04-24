@@ -305,6 +305,23 @@ bool contains(const std::string str, const std::string value)
     return indexOfFirst(str, value) >= 0;
 }
 
+std::string normalizePath(const std::string path)
+{
+    std::string newPath = path;
+
+    // Convert Windows path separators to UNIX ones
+    replaceAllInPlace(newPath, '\\', '/');
+
+    // Remove duplicit slashes
+    regexReplace(newPath, "/{2,}", "/");
+    // Remove "this directory" pointers
+    regexReplace(newPath, "(^|/)\\./", "$1");
+    // Remove unnecessary "parent directory" pointers
+    regexReplace(newPath, "[^/]+/\\.\\./", "/");
+
+    return newPath;
+}
+
 std::string getPathRelativeTo(const std::string relativeTo, const std::string path)
 {
     // Return the path if either of the paths is empty or if the path is absolute
@@ -315,24 +332,14 @@ std::string getPathRelativeTo(const std::string relativeTo, const std::string pa
 
     std::string newPath = relativeTo;
 
-    replaceAllInPlace(newPath, '\\', '/');
-
     // Remove the file name from the path we append to
-    while (newPath.size() && newPath.back() != '/')
+    while (newPath.size() && newPath.back() != '/' && newPath.back() != '\\')
     {
         newPath.pop_back();
     }
 
-    // newPath += replaceAll(path, '\\', '/');
     newPath += path;
 
-    // Remove "this directory" pointers
-    regexReplace(newPath, "(^|/)\\./", "$1");
-    // Remove unnecessary "parent directory" pointers
-    regexReplace(newPath, "[^/]+/\\.\\./", "/");
-    // Remove duplicit slashes
-    regexReplace(newPath, "/{2,}", "/");
-
-    return newPath;
+    return normalizePath(newPath);
 }
 }
