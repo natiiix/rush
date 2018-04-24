@@ -5,7 +5,7 @@
 struct CodeLine
 {
 public:
-  CodeLine(const std::string origin, const int number, const std::string line);
+  CodeLine(const std::string origin, const int number, const std::string code, const int indentation);
 
   // Source file
   const std::string origin;
