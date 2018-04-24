@@ -14,11 +14,17 @@ Compiler::Compiler(const std::string mainSourcePath)
     loadFile(mainSourcePath);
 }
 
+// To be potentially used in the future to tell the user the origin of an error
+// std::string getLineIdentifier(const std::string sourcePath, const int lineNumber)
+// {
+//     return " (" + sourcePath + " : " + std::to_string(lineNumber) + ")";
+// }
+
 void Compiler::loadFile(const std::string path)
 {
     if (contains(m_loadedFiles, path))
     {
-        printLnErr("File already loaded: " + path);
+        printLnWarn("File already loaded: " + path);
         return;
     }
 
@@ -33,19 +39,43 @@ void Compiler::loadFile(const std::string path)
     }
 
     int lineCounter = 1;
-    for (std::string line; getline(file, line);)
+    for (std::string line; getline(file, line); lineCounter++)
     {
-        RegexMatch match = regexMatch(line, "\\w*#include \"([^\"]+)\"\\w*");
+        // Remove whitespace and comments from the line
+        std::string lineClean = getCleanCode(line);
 
-        if (!match.empty())
+        // Skip empty lines
+        if (lineClean.empty())
+        {
+            continue;
+        }
+
+        // Include code from another file
+        RegexMatch match = regexMatch(lineClean, "#include \"([^\"]+)\";?");
+        if (match.success())
         {
             loadFile(getPathRelativeTo(path, match[0]));
             continue;
         }
 
-        m_lines.push_back(CodeLine(path, lineCounter, line));
-        m_allCode += line + "\n";
-        lineCounter++;
+        // Include C++ header
+        match = regexMatch(lineClean, "#include \\<?([^\\<\\>;]+)\\>?;?");
+        if (match.success())
+        {
+            if (contains(m_includes, match[0]))
+            {
+                printLnWarn("Header already included: " + match[0]);
+            }
+            else
+            {
+                m_includes.push_back(match[0]);
+            }
+
+            continue;
+        }
+
+        // Generate a CodeLine object from the line and its metadata and store it
+        m_lines.push_back(CodeLine(path, lineCounter, lineClean, getIndentation(line)));
     }
 
     printLn("File loaded: \"" + path + "\"");
@@ -79,24 +109,6 @@ std::string addLiteral(std::map<std::string, Literal> &literals, const Literal v
     return name;
 }
 
-std::string getLine(const std::string str, int &start)
-{
-    // Find the end of the line
-    int end = start;
-    while (end < str.size() && str[end] != '\n')
-    {
-        end++;
-    }
-
-    // Extract the line
-    std::string line = str.substr(start, end - start);
-
-    // Set the start index to wherever the next line should start
-    start = end + 1;
-
-    return line;
-}
-
 std::string replaceAt(const std::string str, const int start, const int length, const std::string replacement)
 {
     std::string prefix = str.substr(0, start);
@@ -107,84 +119,74 @@ std::string replaceAt(const std::string str, const int start, const int length, 
 
 std::string Compiler::compile(void) const
 {
-    std::map<std::string, Literal> literals;
-    std::string inCode = m_allCode;
+    std::string code;
 
-    // Remove carriage returns
-    replaceAllInPlace(inCode, "\r\n", "\n");
-
-    // Remove escaped newlines
-    replaceAllInPlace(inCode, "\\\n", "");
-
-    // Escape double quotes in character literals
-    replaceAllInPlace(inCode, "'\"'", "'\\\"'");
-
-    // Replace string literals
+    // Include headers
+    for (std::string include : m_includes)
     {
-        int start;
-        while ((start = findUnescaped(inCode, '"')) >= 0)
+        code += "#include <" + include + ">\n";
+    }
+
+    // Iterate through code lines
+    for (CodeLine codeLine : m_lines)
+    {
+        // Get the code of this line
+        std::string line = codeLine.code;
+
+        // Create a vector to temporarily store literal values
+        std::map<std::string, Literal> literals;
+
+        // Escape double quotes in character literals
+        replaceAllInPlace(line, "'\"'", "'\\\"'");
+
+        // Replace string literals
         {
-            int end = findUnescaped(inCode, '"', start + 1);
-
-            if (end < 0)
+            int start;
+            while ((start = findUnescaped(line, '"')) >= 0)
             {
-                printLnErr("Unterminated string literal");
-                return std::string();
+                int end = findUnescaped(line, '"', start + 1);
+
+                // This should never really even happen at this point
+                if (end < 0)
+                {
+                    printLnErr("Unterminated string literal");
+                    return std::string();
+                }
+
+                std::string value = line.substr(start, end - start + 1);
+                std::string name = addLiteral(literals, Literal(value, LiteralType::String));
+                replaceAllInPlace(line, value, name);
             }
-
-            std::string value = inCode.substr(start, end - start + 1);
-            std::string name = addLiteral(literals, Literal(value, LiteralType::String));
-            replaceAllInPlace(inCode, value, name);
         }
-    }
 
-    // Replace numeric literals
-    // Note 1: The RegEx does not match the '-' character in front of negative numbers
-    // to avoid accidentally matching the subtraction operator
-    // Note 2: "\x" is not used to match hexadecimal digits because the GCC std::regex does not support it
-    int offset = 0;
-    for (RegexMatch m : getAllMatches("\\b(?:\\d+(?:\\.\\d+)?f?|0x[0-9a-fA-F]+|0b[01]+)\\b", inCode))
-    {
-        std::string name = addLiteral(literals, Literal(m.str(), LiteralType::Number));
-
-        // Replace the literal value by its placeholder
-        inCode = replaceAt(inCode, m.position() + offset, m.length(), name);
-
-        // Since the placeholders have different length from the original literal values
-        // we must compensate for this difference in the indexing by adding an ofset to all indices
-        offset += name.size() - m.length();
-    }
-
-    // Generate output code
-    std::string outCode;
-    {
-        // Iterate through the lines
-        int idx = 0;
-        while (idx < inCode.size())
+        // Replace numeric literals
+        // Note 1: The RegEx does not match the '-' character in front of negative numbers
+        // to avoid accidentally matching the subtraction operator
+        // Note 2: "\x" is not used to match hexadecimal digits because the GCC std::regex does not support it
+        int offset = 0;
+        for (RegexMatch m : getAllMatches("\\b(?:\\d+(?:\\.\\d+)?f?|0x[0-9a-fA-F]+|0b[01]+)\\b", line))
         {
-            // Get the next line
-            std::string line = getLine(inCode, idx);
+            std::string name = addLiteral(literals, Literal(m.str(), LiteralType::Number));
 
-            // Trim both leading and trailing whitespace
-            line = getCleanCode(line);
+            // Replace the literal value by its placeholder
+            line = replaceAt(line, m.position() + offset, m.length(), name);
 
-            // Ignore empty lines
-            if (line.empty())
-            {
-                continue;
-            }
-
-            // Append the line to the output code
-            outCode += line;
-            outCode += '\n';
+            // Since the placeholders have different length from the original literal values
+            // we must compensate for this difference in the indexing by adding an ofset to all indices
+            offset += name.size() - m.length();
         }
+
+        // TODO: Further line processing
+
+        // Put literal values back
+        for (std::pair<std::string, Literal> lit : literals)
+        {
+            replaceAllInPlace(line, lit.first, lit.second.value());
+        }
+
+        // Append the line to the code
+        code += line + '\n';
     }
 
-    // Put literal values back
-    for (std::pair<std::string, Literal> lit : literals)
-    {
-        replaceAllInPlace(outCode, lit.first, lit.second.value());
-    }
-
-    return outCode;
+    return code;
 }

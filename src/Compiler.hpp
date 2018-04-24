@@ -12,8 +12,8 @@ public:
 
 private:
   std::vector<std::string> m_loadedFiles;
+  std::vector<std::string> m_includes;
   std::vector<CodeLine> m_lines;
-  std::string m_allCode;
 
   void loadFile(const std::string path);
 };
