@@ -69,31 +69,69 @@ bool isWhitespace(const char c)
     return c == ' ' || c == '\t';
 }
 
-std::string trimWhitespace(const std::string input)
+std::string getCleanCode(const std::string line)
 {
-    int leading = 0;
-    int trailing = 0;
+    std::string cleanCode;
 
-    // Count leading whitespace
-    for (int i = 0; i < input.size() && isWhitespace(input[i]); i++)
+    bool inChar = false;
+    bool inString = false;
+    bool addSpace = false;
+
+    for (int i = 0; i < line.size(); i++)
     {
-        leading++;
+        char c = line[i];
+
+        // String literal beginning / end
+        if (!inChar && c == '"' && !isEscaped(line, i))
+        {
+            inString = !inString;
+            cleanCode += '"';
+        }
+        // Character literal beginning / end
+        else if (!inString && c == '\'' && !isEscaped(line, i))
+        {
+            inChar = !inChar;
+            cleanCode += '\'';
+        }
+        // Characters inside a string or character literal
+        else if (inString || inChar)
+        {
+            cleanCode += c;
+        }
+        // Beginning of a comment
+        else if (c == '/' && line.size() > i + 1 && line[i + 1] == '/')
+        {
+            break;
+        }
+        // Whitespace outside of a string literal
+        else if (isWhitespace(c))
+        {
+            addSpace = true;
+        }
+        else
+        {
+            if (addSpace)
+            {
+                // Remove leading whitespace
+                if (cleanCode.size())
+                {
+                    cleanCode += ' ';
+                }
+
+                addSpace = false;
+            }
+
+            cleanCode += c;
+        }
     }
 
-    // The whole string contains nothing but whitespace
-    if (leading == input.size())
+    // Multi-line string literals are illegal
+    if (inString)
     {
-        return std::string();
+        throw std::runtime_error("Unexpected end of line (missing string termination)");
     }
 
-    // Count trailing whitespace
-    for (int i = input.size() - 1; i >= 0 && isWhitespace(input[i]); i--)
-    {
-        trailing++;
-    }
-
-    // Return the input string stripped of whitepsace
-    return input.substr(leading, input.size() - leading - trailing);
+    return cleanCode;
 }
 
 int getIndentation(const std::string str)

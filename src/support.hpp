@@ -18,7 +18,7 @@ RegexMatch regexMatch(const std::string str, const std::string regex);
 RegexMatch regexSearch(const std::string str, const std::string regex);
 void regexReplace(std::string &str, const std::string regex, const std::string replacement);
 bool isWhitespace(const char c);
-std::string trimWhitespace(const std::string input);
+std::string getCleanCode(const std::string input);
 int getIndentation(const std::string str);
 std::string readFile(const char *const path);
 void replaceAllInPlace(std::string &str, const std::string &from, const std::string &to);

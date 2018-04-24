@@ -3,6 +3,6 @@
 
 using namespace support;
 
-CodeLine::CodeLine(const std::string origin, const int number, const std::string line) : origin(origin), number(number), code(trimWhitespace(line)), indentation(getIndentation(line))
+CodeLine::CodeLine(const std::string origin, const int number, const std::string line) : origin(origin), number(number), code(getCleanCode(line)), indentation(getIndentation(line))
 {
 }

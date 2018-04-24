@@ -166,7 +166,7 @@ std::string Compiler::compile(void) const
             std::string line = getLine(inCode, idx);
 
             // Trim both leading and trailing whitespace
-            line = trimWhitespace(line);
+            line = getCleanCode(line);
 
             // Ignore empty lines
             if (line.empty())
