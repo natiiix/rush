@@ -1,16 +1,8 @@
 #include "CodeLine.hpp"
 #include "support.hpp"
 
-CodeLine::CodeLine(const std::string code, const int indentation) : m_code(code), m_indentation(indentation)
-{
-}
+using namespace support;
 
-const int CodeLine::indentation() const
+CodeLine::CodeLine(const std::string origin, const int number, const std::string line) : origin(origin), number(number), code(trimWhitespace(line)), indentation(getIndentation(line))
 {
-    return m_indentation;
-}
-
-const std::string CodeLine::code() const
-{
-    return m_code;
 }
