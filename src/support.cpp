@@ -403,7 +403,7 @@ std::string normalizePath(const std::string path)
     // Remove "this directory" pointers
     regexReplace(newPath, "(^|/)\\./", "$1");
     // Remove unnecessary "parent directory" pointers
-    regexReplace(newPath, "[^/]+/\\.\\./", "/");
+    regexReplace(newPath, "[^/]+/\\.\\./", "");
 
     return newPath;
 }
