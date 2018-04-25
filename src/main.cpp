@@ -11,7 +11,7 @@ int main(const int argc, const char *const argv[])
     // Not enough arguments
     if (argc < 3)
     {
-        printLnErr("Expected syntax: rush <Output File> <Main Source File> [--keep] [C++ Compiler Arguments]");
+        printLn("Syntax: rush <Output File> <Main Source File> [--keep] [C++ Compiler Arguments]");
         return -1;
     }
 
