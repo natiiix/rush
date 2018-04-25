@@ -428,4 +428,16 @@ std::string getPathRelativeTo(const std::string relativeTo, const std::string pa
 
     return normalizePath(newPath);
 }
+
+std::string wrapInQuotesIfContainsSpace(const std::string str)
+{
+    if (contains(str, ' '))
+    {
+        return '\"' + str + '\"';
+    }
+    else
+    {
+        return str;
+    }
+}
 }

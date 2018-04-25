@@ -37,6 +37,7 @@ bool contains(const std::string str, const std::string value);
 bool contains(const std::string str, const char value);
 std::string normalizePath(const std::string path);
 std::string getPathRelativeTo(const std::string relativeTo, const std::string path);
+std::string wrapInQuotesIfContainsSpace(const std::string str);
 
 template <class T, class U, class F>
 void map(const std::vector<T> src, std::vector<U> &dest, const F f)
