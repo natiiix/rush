@@ -32,7 +32,9 @@ bool startsWith(const std::string str, const std::string value);
 bool isEscaped(const std::string str, const int index);
 int findUnescaped(const std::string str, const char value, const int start = 0);
 int indexOfFirst(const std::string str, const std::string value);
+int indexOfFirst(const std::string str, const char value);
 bool contains(const std::string str, const std::string value);
+bool contains(const std::string str, const char value);
 std::string normalizePath(const std::string path);
 std::string getPathRelativeTo(const std::string relativeTo, const std::string path);
 

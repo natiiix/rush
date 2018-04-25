@@ -368,7 +368,25 @@ int indexOfFirst(const std::string str, const std::string value)
     return -1;
 }
 
+int indexOfFirst(const std::string str, const char value)
+{
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (str[i] == value)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 bool contains(const std::string str, const std::string value)
+{
+    return indexOfFirst(str, value) >= 0;
+}
+
+bool contains(const std::string str, const char value)
 {
     return indexOfFirst(str, value) >= 0;
 }
