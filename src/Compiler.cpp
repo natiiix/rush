@@ -133,6 +133,14 @@ std::string Compiler::compile(void) const
         // Get the code of this line
         std::string line = codeLine.code;
 
+        // Omit "#pragma once" statements from the temporary code
+        // (they serve no purpose since the Compiler prevents files
+        // from being included multiple times even without it)
+        if (line == "#pragma once")
+        {
+            continue;
+        }
+
         // Create a vector to temporarily store literal values
         std::map<std::string, Literal> literals;
 
