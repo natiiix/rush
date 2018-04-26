@@ -17,7 +17,8 @@ std::vector<RegexMatch> getAllMatches(const std::regex reg, const std::string st
 std::vector<RegexMatch> getAllMatches(const std::string reg, const std::string str);
 RegexMatch regexMatch(const std::string str, const std::string regex);
 RegexMatch regexSearch(const std::string str, const std::string regex);
-void regexReplace(std::string &str, const std::string regex, const std::string replacement);
+std::string regexReplace(const std::string str, const std::string regex, const std::string replacement);
+void regexReplaceInPlace(std::string &str, const std::string regex, const std::string replacement);
 bool isWhitespace(const char c);
 std::string getCleanCode(const std::string input);
 int getIndentation(const std::string str);
@@ -37,7 +38,9 @@ bool contains(const std::string str, const std::string value);
 bool contains(const std::string str, const char value);
 std::string normalizePath(const std::string path);
 std::string getPathRelativeTo(const std::string relativeTo, const std::string path);
+std::string wrapInQuotes(const std::string str);
 std::string wrapInQuotesIfContainsSpace(const std::string str);
+std::string toStringLiteral(const std::string str);
 
 template <class T, class U, class F>
 void map(const std::vector<T> src, std::vector<U> &dest, const F f)

@@ -64,9 +64,14 @@ RegexMatch regexSearch(const std::string str, const std::string regex)
     return RegexMatch(match);
 }
 
-void regexReplace(std::string &str, const std::string regex, const std::string replacement)
+std::string regexReplace(const std::string str, const std::string regex, const std::string replacement)
 {
-    str = std::regex_replace(str, std::regex(regex), replacement);
+    return std::regex_replace(str, std::regex(regex), replacement);
+}
+
+void regexReplaceInPlace(std::string &str, const std::string regex, const std::string replacement)
+{
+    str = regexReplace(str, regex, replacement);
 }
 
 bool isWhitespace(const char c)
@@ -399,11 +404,11 @@ std::string normalizePath(const std::string path)
     replaceAllInPlace(newPath, '\\', '/');
 
     // Remove duplicit slashes
-    regexReplace(newPath, "/{2,}", "/");
+    regexReplaceInPlace(newPath, "/{2,}", "/");
     // Remove "this directory" pointers
-    regexReplace(newPath, "(^|/)\\./", "$1");
+    regexReplaceInPlace(newPath, "(^|/)\\./", "$1");
     // Remove unnecessary "parent directory" pointers
-    regexReplace(newPath, "[^/]+/\\.\\./", "");
+    regexReplaceInPlace(newPath, "[^/]+/\\.\\./", "");
 
     return newPath;
 }
@@ -429,15 +434,25 @@ std::string getPathRelativeTo(const std::string relativeTo, const std::string pa
     return normalizePath(newPath);
 }
 
+std::string wrapInQuotes(const std::string str)
+{
+    return '\"' + str + '\"';
+}
+
 std::string wrapInQuotesIfContainsSpace(const std::string str)
 {
     if (contains(str, ' '))
     {
-        return '\"' + str + '\"';
+        return wrapInQuotes(str);
     }
     else
     {
         return str;
     }
+}
+
+std::string toStringLiteral(const std::string str)
+{
+    return wrapInQuotes(regexReplace(str, "(\"|\\\\)", "\\$1"));
 }
 }
