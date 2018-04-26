@@ -20,7 +20,6 @@ RegexMatch regexSearch(const std::string str, const std::string regex);
 std::string regexReplace(const std::string str, const std::string regex, const std::string replacement);
 void regexReplaceInPlace(std::string &str, const std::string regex, const std::string replacement);
 bool isWhitespace(const char c);
-std::string getCleanCode(const std::string input);
 int getIndentation(const std::string str);
 std::string readFile(const char *const path);
 void replaceAllInPlace(std::string &str, const std::string &from, const std::string &to);
