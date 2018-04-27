@@ -39,7 +39,6 @@ std::string normalizePath(const std::string path);
 std::string getPathRelativeTo(const std::string relativeTo, const std::string path);
 std::string wrapInQuotes(const std::string str);
 std::string wrapInQuotesIfContainsSpace(const std::string str);
-std::string toStringLiteral(const std::string str);
 
 template <class T, class U, class F>
 void map(const std::vector<T> src, std::vector<U> &dest, const F f)

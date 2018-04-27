@@ -19,5 +19,6 @@ private:
   std::map<std::string, Literal> m_literals;
 
   void loadFile(const std::string path);
+  std::string getCleanCode(const std::string line);
   void processLine(const std::string line, const std::string origin, const int number);
 };

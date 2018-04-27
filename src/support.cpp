@@ -379,9 +379,4 @@ std::string wrapInQuotesIfContainsSpace(const std::string str)
         return str;
     }
 }
-
-std::string toStringLiteral(const std::string str)
-{
-    return wrapInQuotes(regexReplace(str, "(\"|\\\\)", "\\$1"));
-}
 }
