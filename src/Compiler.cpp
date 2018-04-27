@@ -169,6 +169,18 @@ std::string _rawStrToCStr(const std::string rawStr)
     return escaped;
 }
 
+void Compiler::includeHeader(const std::string header, const bool warnIfAlreadyIncluded)
+{
+    if (!contains(m_includes, header))
+    {
+        m_includes.push_back(header);
+    }
+    else if (warnIfAlreadyIncluded)
+    {
+        printLnWarn("Header already included: " + header);
+    }
+}
+
 std::string Compiler::getCleanCode(const std::string line)
 {
     std::string clean;
@@ -205,6 +217,7 @@ std::string Compiler::getCleanCode(const std::string line)
 
                 if (inLiteral == '/')
                 {
+                    includeHeader("regex", false);
                     clean += "std::regex(" + name + ")";
                 }
                 else
@@ -262,15 +275,7 @@ void Compiler::processLine(const std::string line, const std::string origin, con
         match = regexMatch(line, "\\s*#include\\s+\\<?([^\\<\\>;]+)\\>?;?\\s*");
         if (match.success())
         {
-            if (contains(m_includes, match[0]))
-            {
-                printLnWarn("Header already included: " + match[0]);
-            }
-            else
-            {
-                m_includes.push_back(match[0]);
-            }
-
+            includeHeader(match[0], true);
             return;
         }
     }
