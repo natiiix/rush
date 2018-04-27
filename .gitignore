@@ -36,3 +36,6 @@ bin/
 
 # VSCode settings file
 .vscode/settings.json
+
+# Temporary C++ files used by Rush compiler
+*.tmp.cpp
