@@ -75,14 +75,6 @@ std::string addLiteral(std::map<std::string, Literal> &literals, const Literal v
     return name;
 }
 
-std::string replaceAt(const std::string str, const int start, const int length, const std::string replacement)
-{
-    std::string prefix = str.substr(0, start);
-    std::string suffix = str.substr(start + length);
-
-    return prefix + replacement + suffix;
-}
-
 std::string Compiler::compile(void) const
 {
     std::string code;

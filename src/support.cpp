@@ -379,4 +379,12 @@ std::string wrapInQuotesIfContainsSpace(const std::string str)
         return str;
     }
 }
+
+std::string replaceAt(const std::string str, const int start, const int length, const std::string replacement)
+{
+    std::string prefix = str.substr(0, start);
+    std::string suffix = str.substr(start + length);
+
+    return prefix + replacement + suffix;
+}
 }
