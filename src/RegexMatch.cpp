@@ -13,6 +13,11 @@ RegexMatch::RegexMatch(const std::smatch m)
     m_captures = std::vector<std::string>(m.begin() + 1, m.end());
 }
 
+const bool RegexMatch::success() const
+{
+    return !m_empty;
+}
+
 const int RegexMatch::position() const
 {
     return m_position;

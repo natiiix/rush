@@ -5,24 +5,29 @@
 
 namespace support
 {
-void printLn(const char *const str)
+void printLn(const std::string str)
 {
     std::cout << str << std::endl;
 }
 
-void printLn(const std::string str)
-{
-    printLn(str.c_str());
-}
-
-void printLnErr(const char *const str)
-{
-    std::cerr << "ERROR: " << str << std::endl;
-}
-
 void printLnErr(const std::string str)
 {
-    printLnErr(str.c_str());
+    std::cerr << "!!! ERROR: " << str << std::endl;
+}
+
+void printLnWarn(const std::string str)
+{
+    std::cerr << "*** WARNING: " << str << std::endl;
+}
+
+void log(const std::string str)
+{
+    std::cout << str << " ..." << std::endl;
+}
+
+void ok(void)
+{
+    printLn("+++ OK");
 }
 
 std::vector<RegexMatch> getAllMatches(const std::regex reg, const std::string str)
@@ -43,38 +48,48 @@ std::vector<RegexMatch> getAllMatches(const std::string reg, const std::string s
     return getAllMatches(std::regex(reg), str);
 }
 
+RegexMatch regexMatch(const std::string str, const std::string regex)
+{
+    std::smatch match;
+    bool success = std::regex_match(str, match, std::regex(regex));
+
+    return RegexMatch(match);
+}
+
+RegexMatch regexSearch(const std::string str, const std::string regex)
+{
+    std::smatch match;
+    bool success = std::regex_search(str, match, std::regex(regex));
+
+    return RegexMatch(match);
+}
+
+std::string regexReplace(const std::string str, const std::string regex, const std::string replacement)
+{
+    return std::regex_replace(str, std::regex(regex), replacement);
+}
+
+void regexReplaceInPlace(std::string &str, const std::string regex, const std::string replacement)
+{
+    str = regexReplace(str, regex, replacement);
+}
+
 bool isWhitespace(const char c)
 {
     return c == ' ' || c == '\t';
 }
 
-std::string trimWhitespace(const std::string input, int &indentation)
+int getIndentation(const std::string str)
 {
-    int leading = 0;
-    int trailing = 0;
-
-    // Count leading whitespace
-    for (int i = 0; i < input.size() && isWhitespace(input[i]); i++)
+    for (int i = 0; i < str.size(); i++)
     {
-        leading++;
+        if (!isWhitespace(str[i]))
+        {
+            return i;
+        }
     }
 
-    indentation = leading;
-
-    // The whole string contains nothing but whitespace
-    if (leading == input.size())
-    {
-        return std::string();
-    }
-
-    // Count trailing whitespace
-    for (int i = input.size() - 1; i >= 0 && isWhitespace(input[i]); i--)
-    {
-        trailing++;
-    }
-
-    // Return the input string stripped of whitepsace
-    return input.substr(leading, input.size() - leading - trailing);
+    return str.size();
 }
 
 // Source: https://stackoverflow.com/a/2602258/3043260
@@ -125,10 +140,36 @@ void replaceAllInPlace(std::string &str, const std::string &from, const std::str
     }
 }
 
+void replaceAllInPlace(std::string &str, const char from, const char to)
+{
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (str[i] == from)
+        {
+            str[i] = to;
+        }
+    }
+}
+
 std::string replaceAll(const std::string &str, const std::string &from, const std::string &to)
 {
     std::string newStr = str;
     replaceAllInPlace(newStr, from, to);
+    return newStr;
+}
+
+std::string replaceAll(const std::string &str, const char from, const char to)
+{
+    std::string newStr;
+
+    for (int i = 0; i < newStr.size(); i++)
+    {
+        if (newStr[i] == from)
+        {
+            newStr[i] = to;
+        }
+    }
+
     return newStr;
 }
 
@@ -170,6 +211,25 @@ std::string join(const std::string separator, const std::vector<std::string> val
     return ss.str();
 }
 
+bool isEscaped(const std::string str, const int index)
+{
+    bool escaped = false;
+
+    for (int i = index - 1; index >= 0; i--)
+    {
+        if (str[i] == '\\')
+        {
+            escaped = !escaped;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return escaped;
+}
+
 int findUnescaped(const std::string str, const char value, const int start)
 {
     bool escaped = false;
@@ -193,5 +253,138 @@ int findUnescaped(const std::string str, const char value, const int start)
     }
 
     return -1;
+}
+
+bool startsWith(const std::string str, const std::string value)
+{
+    if (str.size() < value.size())
+    {
+        return false;
+    }
+
+    for (int i = 0; i < value.size(); i++)
+    {
+        if (str[i] != value[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int indexOfFirst(const std::string str, const std::string value)
+{
+    if (value.size() < str.size())
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < str.size() - value.size() + 1; i++)
+    {
+        bool equals = true;
+
+        for (int j = 0; j < value.size(); j++)
+        {
+            if (str[i + j] != value[j])
+            {
+                equals = false;
+                break;
+            }
+        }
+
+        if (equals)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+int indexOfFirst(const std::string str, const char value)
+{
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (str[i] == value)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+bool contains(const std::string str, const std::string value)
+{
+    return indexOfFirst(str, value) >= 0;
+}
+
+bool contains(const std::string str, const char value)
+{
+    return indexOfFirst(str, value) >= 0;
+}
+
+std::string normalizePath(const std::string path)
+{
+    std::string newPath = path;
+
+    // Convert Windows path separators to UNIX ones
+    replaceAllInPlace(newPath, '\\', '/');
+
+    // Remove duplicit slashes
+    regexReplaceInPlace(newPath, "/{2,}", "/");
+    // Remove "this directory" pointers
+    regexReplaceInPlace(newPath, "(^|/)\\./", "$1");
+    // Remove unnecessary "parent directory" pointers
+    regexReplaceInPlace(newPath, "[^/]+/\\.\\./", "");
+
+    return newPath;
+}
+
+std::string getPathRelativeTo(const std::string relativeTo, const std::string path)
+{
+    // Return the path if either of the paths is empty or if the path is absolute
+    if (!relativeTo.size() || !path.size() || path.front() == '/')
+    {
+        return path;
+    }
+
+    std::string newPath = relativeTo;
+
+    // Remove the file name from the path we append to
+    while (newPath.size() && newPath.back() != '/' && newPath.back() != '\\')
+    {
+        newPath.pop_back();
+    }
+
+    newPath += path;
+
+    return normalizePath(newPath);
+}
+
+std::string wrapInQuotes(const std::string str)
+{
+    return '\"' + str + '\"';
+}
+
+std::string wrapInQuotesIfContainsSpace(const std::string str)
+{
+    if (contains(str, ' '))
+    {
+        return wrapInQuotes(str);
+    }
+    else
+    {
+        return str;
+    }
+}
+
+std::string replaceAt(const std::string str, const int start, const int length, const std::string replacement)
+{
+    std::string prefix = str.substr(0, start);
+    std::string suffix = str.substr(start + length);
+
+    return prefix + replacement + suffix;
 }
 }

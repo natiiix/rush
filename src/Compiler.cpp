@@ -1,24 +1,53 @@
 #include "Compiler.hpp"
 #include <iostream>
-#include <regex>
+#include <fstream>
+#include <map>
+#include <exception>
 #include "support.hpp"
 #include "CodeLine.hpp"
 #include "Literal.hpp"
 
 using namespace support;
 
-Compiler::Compiler(const std::vector<std::string> sourceFiles)
+Compiler::Compiler(const std::string mainSourcePath)
 {
-    m_originalCode = join("\n", sourceFiles);
+    loadFile(mainSourcePath);
 }
 
-std::ostream &err(void)
+// To be potentially used in the future to tell the user the origin of an error
+// std::string getLineIdentifier(const std::string sourcePath, const int lineNumber)
+// {
+//     return " (" + sourcePath + " : " + std::to_string(lineNumber) + ")";
+// }
+
+void Compiler::loadFile(const std::string path)
 {
-    std::cerr << "COMPILE ERROR: ";
-    return std::cerr;
+    if (contains(m_loadedFiles, path))
+    {
+        printLnWarn("File already loaded: " + path);
+        return;
+    }
+
+    printLn("Reading file: \"" + path + "\"");
+
+    m_loadedFiles.push_back(path);
+    std::ifstream file(path);
+
+    if (!file)
+    {
+        throw std::runtime_error("Unable to open file for reading");
+    }
+
+    int lineCounter = 1;
+    for (std::string line; getline(file, line); lineCounter++)
+    {
+        processLine(line, path, lineCounter);
+    }
+
+    printLn("File loaded: \"" + path + "\"");
 }
 
-std::string addLiteral(std::map<std::string, Literal> &literals, const Literal value)
+std::string Compiler::addLiteral(const Literal value)
 {
     std::string strType;
 
@@ -38,126 +67,217 @@ std::string addLiteral(std::map<std::string, Literal> &literals, const Literal v
     }
 
     // Generate a placeholder name for the literal value
-    std::string name = "__LITERAL__" + strType + "__" + std::to_string(literals.size()) + "__";
+    std::string name = "__LITERAL__" + strType + "__" + std::to_string(m_literals.size()) + "__";
 
     // Add the literal to the map
-    literals[name] = value;
+    m_literals[name] = value;
 
     return name;
 }
 
-void regexReplace(std::string &str, const std::string regex, const std::string replacement)
-{
-    str = std::regex_replace(str, std::regex(regex), replacement);
-}
-
-std::string getLine(const std::string str, int &start)
-{
-    // Find the end of the line
-    int end = start;
-    while (end < str.size() && str[end] != '\n')
-    {
-        end++;
-    }
-
-    // Extract the line
-    std::string line = str.substr(start, end - start);
-
-    // Set the start index to wherever the next line should start
-    start = end + 1;
-
-    return line;
-}
-
-std::string replaceAt(const std::string str, const int start, const int length, const std::string replacement)
-{
-    std::string prefix = str.substr(0, start);
-    std::string suffix = str.substr(start + length);
-
-    return prefix + replacement + suffix;
-}
-
 std::string Compiler::compile(void) const
 {
-    std::map<std::string, Literal> literals;
-    std::string inCode = m_originalCode;
+    std::string code;
 
-    // Remove carriage returns
-    replaceAllInPlace(inCode, "\r\n", "\n");
-
-    // Remove escaped newlines
-    replaceAllInPlace(inCode, "\\\n", "");
-
-    // Escape double quotes in character literals
-    replaceAllInPlace(inCode, "'\"'", "'\\\"'");
-
-    // Replace string literals
+    // Include headers
+    for (std::string include : m_includes)
     {
-        int start;
-        while ((start = findUnescaped(inCode, '"')) >= 0)
+        code += "#include <" + include + ">\n";
+    }
+
+    // Iterate through code lines
+    std::vector<int> indentationLevels;
+    indentationLevels.push_back(0);
+
+    for (CodeLine codeLine : m_lines)
+    {
+        // Get the code of this line
+        std::string line = codeLine.code;
+
+        // Higher indentation level
+        if (codeLine.indentation > indentationLevels.back())
         {
-            int end = findUnescaped(inCode, '"', start + 1);
+            code += "{\n";
+            indentationLevels.push_back(codeLine.indentation);
+        }
+        // Lower indentation level
+        else if (codeLine.indentation < indentationLevels.back())
+        {
+            code += "}\n";
+            indentationLevels.pop_back();
+        }
 
-            if (end < 0)
+        // TODO: Further line processing
+
+        // Put literal values back
+        for (std::pair<std::string, Literal> lit : m_literals)
+        {
+            replaceAllInPlace(line, lit.first, lit.second.value());
+        }
+
+        // If a line ends with a backslash, the next line is supposed to be appended to it
+        if (line.back() == '\\')
+        {
+            line.pop_back();
+        }
+        // Regular lines have a newline character at the end
+        else
+        {
+            line += '\n';
+        }
+
+        // Append the line to the code
+        code += line;
+    }
+
+    // Terminate all the remaining scopes
+    while (indentationLevels.size() > 1)
+    {
+        code += "}\n";
+        indentationLevels.pop_back();
+    }
+
+    return code;
+}
+
+void _addSpace(std::string &str, bool &addSpace)
+{
+    if (addSpace)
+    {
+        // Never add spaces to the beginning of a line
+        if (str.size())
+        {
+            str += ' ';
+        }
+
+        addSpace = false;
+    }
+}
+
+std::string _rawStrToCStr(const std::string rawStr)
+{
+    std::string escaped = regexReplace(rawStr, "(\"|\\\\)", "\\$1");
+    escaped.back() = escaped.front() = '"';
+    return escaped;
+}
+
+void Compiler::includeHeader(const std::string header, const bool warnIfAlreadyIncluded)
+{
+    if (!contains(m_includes, header))
+    {
+        m_includes.push_back(header);
+    }
+    else if (warnIfAlreadyIncluded)
+    {
+        printLnWarn("Header already included: " + header);
+    }
+}
+
+std::string Compiler::getCleanCode(const std::string line)
+{
+    std::string clean;
+
+    char inLiteral = '\0';
+    int literalStart = 0;
+    std::string literal;
+
+    bool addSpace = false;
+
+    for (int i = 0; i < line.size(); i++)
+    {
+        char c = line[i];
+
+        // Beginning of a comment
+        if (!inLiteral && c == '/' && line.size() > i + 1 && line[i + 1] == '/')
+        {
+            break;
+        }
+        // String or character literal
+        else if ((c == '"' || c == '\'' || c == '`' || c == '/') && (!isEscaped(line, i) || c == '`') && (!inLiteral || c == inLiteral))
+        {
+            _addSpace(clean, addSpace);
+            literal += c;
+
+            if (inLiteral)
             {
-                err() << "Unterminated string literal" << std::endl;
-                return std::string();
-            }
+                if (inLiteral == '`' || inLiteral == '/')
+                {
+                    literal = _rawStrToCStr(literal);
+                }
 
-            std::string value = inCode.substr(start, end - start + 1);
-            std::string name = addLiteral(literals, Literal(value, LiteralType::String));
-            replaceAllInPlace(inCode, value, name);
+                std::string name = addLiteral(Literal(literal, LiteralType::String));
+
+                if (inLiteral == '/')
+                {
+                    includeHeader("regex", false);
+                    clean += "std::regex(" + name + ")";
+                }
+                else
+                {
+                    clean += name;
+                }
+
+                inLiteral = '\0';
+                literal.clear();
+            }
+            else
+            {
+                inLiteral = c;
+                literalStart = i;
+            }
+        }
+        // Characters inside a string or character literal
+        else if (inLiteral)
+        {
+            literal += c;
+        }
+        // Whitespace outside of a string literal
+        else if (isWhitespace(c))
+        {
+            addSpace = true;
+        }
+        else
+        {
+            _addSpace(clean, addSpace);
+            clean += c;
         }
     }
 
-    // Replace numeric literals
-    // Note 1: The RegEx does not match the '-' character in front of negative numbers
-    // to avoid accidentally matching the subtraction operator
-    // Note 2: "\x" is not used to match hexadecimal digits because the GCC std::regex does not support it
-    int offset = 0;
-    for (RegexMatch m : getAllMatches("\\b(?:\\d+(?:\\.\\d+)?f?|0x[0-9a-fA-F]+|0b[01]+)\\b", inCode))
+    // Multi-line string literals are illegal
+    if (inLiteral)
     {
-        std::string name = addLiteral(literals, Literal(m.str(), LiteralType::Number));
-
-        // Replace the literal value by its placeholder
-        inCode = replaceAt(inCode, m.position() + offset, m.length(), name);
-
-        // Since the placeholders have different length from the original literal values
-        // we must compensate for this difference in the indexing by adding an ofset to all indices
-        offset += name.size() - m.length();
+        throw std::runtime_error("Unexpected end of line (missing string termination)");
     }
 
-    // Generate output code
-    std::string outCode;
+    return clean;
+}
+
+void Compiler::processLine(const std::string line, const std::string origin, const int number)
+{
     {
-        // Iterate through the lines
-        int idx = 0;
-        while (idx < inCode.size())
+        // Include code from another file
+        RegexMatch match = regexMatch(line, "\\s*#include\\s+\"([^\"]+)\";?\\s*");
+        if (match.success())
         {
-            // Get the next line
-            std::string line = getLine(inCode, idx);
+            loadFile(getPathRelativeTo(origin, match[0]));
+            return;
+        }
 
-            // Trim both leading and trailing whitespace and get the indentation level
-            int indentation = 0;
-            line = trimWhitespace(line, indentation);
-
-            // Ignore empty lines
-            if (line.empty())
-            {
-                continue;
-            }
-
-            // Append the line to the output code
-            outCode += line;
-            outCode += '\n';
+        // Include C++ header
+        match = regexMatch(line, "\\s*#include\\s+\\<?([^\\<\\>;]+)\\>?;?\\s*");
+        if (match.success())
+        {
+            includeHeader(match[0], true);
+            return;
         }
     }
 
-    // Put literal values back
-    for (std::pair<std::string, Literal> lit : literals)
-    {
-        replaceAllInPlace(outCode, lit.first, lit.second.value());
-    }
+    std::string clean = getCleanCode(line);
 
-    return outCode;
+    // Skip empty lines
+    if (clean.size())
+    {
+        // Generate a CodeLine object from the line and its metadata and store it
+        m_lines.push_back(CodeLine(origin, number, clean, getIndentation(line)));
+    }
 }
