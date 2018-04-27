@@ -47,7 +47,7 @@ void Compiler::loadFile(const std::string path)
     printLn("File loaded: \"" + path + "\"");
 }
 
-std::string addLiteral(std::map<std::string, Literal> &literals, const Literal value)
+std::string Compiler::addLiteral(const Literal value)
 {
     std::string strType;
 
@@ -67,10 +67,10 @@ std::string addLiteral(std::map<std::string, Literal> &literals, const Literal v
     }
 
     // Generate a placeholder name for the literal value
-    std::string name = "__LITERAL__" + strType + "__" + std::to_string(literals.size()) + "__";
+    std::string name = "__LITERAL__" + strType + "__" + std::to_string(m_literals.size()) + "__";
 
     // Add the literal to the map
-    literals[name] = value;
+    m_literals[name] = value;
 
     return name;
 }
@@ -205,7 +205,7 @@ std::string Compiler::getCleanCode(const std::string line)
                     literal = _rawStrToCStr(literal);
                 }
 
-                std::string name = addLiteral(m_literals, Literal(literal, LiteralType::String));
+                std::string name = addLiteral(Literal(literal, LiteralType::String));
 
                 if (inLiteral == '/')
                 {
