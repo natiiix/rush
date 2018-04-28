@@ -223,9 +223,9 @@ namespace support
         // Remove duplicit slashes
         regexReplaceInPlace(newPath, "/{2,}", "/");
         // Remove "this directory" pointers
-        regexReplaceInPlace(newPath, "(^|/)\\./", "$1");
+        regexReplaceInPlace(newPath, `(^|/)\./`, "$1");
         // Remove unnecessary "parent directory" pointers
-        regexReplaceInPlace(newPath, "[^/]+/\\.\\./", "");
+        regexReplaceInPlace(newPath, `[^/]+/\.\./`, "");
 
         return newPath;
 
