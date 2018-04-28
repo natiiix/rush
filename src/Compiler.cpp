@@ -100,11 +100,14 @@ std::string Compiler::compile(void) const
             code += "{\n";
             indentationLevels.push_back(codeLine.indentation);
         }
-        // Lower indentation level
-        else if (codeLine.indentation < indentationLevels.back())
+        else
         {
-            code += "}\n";
-            indentationLevels.pop_back();
+            // Lower indentation level
+            while (codeLine.indentation < indentationLevels.back())
+            {
+                code += "}\n";
+                indentationLevels.pop_back();
+            }
         }
 
         // TODO: Further line processing
