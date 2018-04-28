@@ -13,13 +13,10 @@
 using namespace support;
 
 int main(const int argc, const char *const argv[])
-{
     // Not enough arguments
     if (argc < 3)
-    {
         printLn("Syntax: rush <Output File> <Main Source File> [--keep] [C++ Compiler Arguments]");
         return -1;
-    }
 
     log("Loading source files");
 
@@ -38,10 +35,8 @@ int main(const int argc, const char *const argv[])
 
     // Compile error occurred
     if (tempCode.empty())
-    {
         printLnErr("Unable to compile the source files");
         return -1;
-    }
 
     ok();
 
@@ -54,10 +49,8 @@ int main(const int argc, const char *const argv[])
 
     // Check if the temporary file has been correctly opened
     if (!tmpFile.is_open())
-    {
         printLnErr("Unable to create a temporary file");
         return -1;
-    }
 
     // Write the temporary code to the temporary file
     tmpFile << tempCode;
@@ -72,18 +65,12 @@ int main(const int argc, const char *const argv[])
     std::string compilerArgs;
 
     for (int i = 3; i < argc; i++)
-    {
         std::string arg = argv[i];
 
         if (i == 3 && arg == "--keep")
-        {
             deleteTmpFile = false;
-        }
         else
-        {
             compilerArgs += " " + wrapInQuotesIfContainsSpace(arg);
-        }
-    }
 
     // Compile the temporary file
     log("Compiling the temporary code into a binary executable");
@@ -91,32 +78,23 @@ int main(const int argc, const char *const argv[])
     std::string compileCmd = "c++ -o " + wrapInQuotesIfContainsSpace(argv[1]) + " " + wrapInQuotesIfContainsSpace(tmpPath) + compilerArgs;
 
     if (system(compileCmd.c_str()))
-    {
         printLnErr("Unable to compile the temporary code");
         return -1;
-    }
 
     ok();
 
     // Delete the temporary file unless the user has specified they want to keep it
     if (deleteTmpFile)
-    {
         log("Deleting the temporary file");
 
         if (remove(tmpPath.c_str()))
-        {
             printLnErr("Unable to delete the temporary file");
             return -1;
-        }
 
         ok();
-    }
     else
-    {
         log("Keeping the temporary file");
         ok();
-    }
 
     // Everything worked correctly
     return 0;
-}
