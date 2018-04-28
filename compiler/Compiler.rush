@@ -23,7 +23,7 @@ void Compiler::loadFile(const std::string path)
         printLnWarn("File already loaded: " + path);
         return;
 
-    printLn("Reading file: \"" + path + "\"");
+    printLn(`Reading file: "` + path + `"`);
 
     m_loadedFiles.push_back(path);
     std::ifstream file(path);
@@ -35,7 +35,7 @@ void Compiler::loadFile(const std::string path)
     for (std::string line; getline(file, line); lineCounter++)
         processLine(line, path, lineCounter);
 
-    printLn("File loaded: \"" + path + "\"");
+    printLn(`File loaded: "` + path + `"`);
 
 std::string Compiler::addLiteral(const Literal value)
     std::string strType;
@@ -121,7 +121,7 @@ void _addSpace(std::string &str, bool &addSpace)
         addSpace = false;
 
 std::string _rawStrToCStr(const std::string rawStr)
-    std::string escaped = regexReplace(rawStr, "(\"|\\\\)", "\\$1");
+    std::string escaped = regexReplace(rawStr, `("|\\)`, `\$1`);
     escaped.back() = escaped.front() = '"';
     return escaped;
 
@@ -186,13 +186,13 @@ std::string Compiler::getCleanCode(const std::string line)
 
 void Compiler::processLine(const std::string line, const std::string origin, const int number)
     // Include code from another file
-    RegexMatch match = regexMatch(line, "\\s*#include\\s+\"([^\"]+)\";?\\s*");
+    RegexMatch match = regexMatch(line, `\s*#include\s+"([^"]+)";?\s*`);
     if (match.success())
         loadFile(getPathRelativeTo(origin, match[0]));
         return;
 
     // Include C++ header
-    match = regexMatch(line, "\\s*#include\\s+\\<?([^\\<\\>;]+)\\>?;?\\s*");
+    match = regexMatch(line, `\s*#include\s+\<?([^\<\>;]+)\>?;?\s*`);
     if (match.success())
         includeHeader(match[0], true);
         return;
