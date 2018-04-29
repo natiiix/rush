@@ -1,21 +1,17 @@
 #include <string>
 
 enum LiteralType
-{
-Number,
-String
-};
+    Number,
+    String
 
 class Literal
-{
-public:
-Literal(void) {}
-Literal(const std::string value, const LiteralType type);
+    public:
+    Literal(void) {}
+    Literal(const std::string value, const LiteralType type);
 
-const std::string value(void) const;
-const LiteralType type(void) const;
+    const std::string value(void) const;
+    const LiteralType type(void) const;
 
-private:
-std::string m_value;
-LiteralType m_type;
-};
+    private:
+    std::string m_value;
+    LiteralType m_type;
