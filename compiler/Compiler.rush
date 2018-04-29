@@ -37,6 +37,17 @@ void Compiler::loadFile(const std::string path)
 
     printLn(`File loaded: "` + path + `"`);
 
+void _endScope(std::string &code, std::vector<int> &indentationLevels, std::vector<int> &typeDefLevels)
+    // End of type definition
+    if (indentationLevels.size() == typeDefLevels.back())
+        code += "};\n";
+        typeDefLevels.pop_back();
+    // End of a different code block
+    else
+        code += "}\n";
+
+    indentationLevels.pop_back();
+
 std::string Compiler::addLiteral(const Literal value)
     std::string strType;
 
@@ -68,11 +79,13 @@ std::string Compiler::compile(void) const
     for (std::string include : m_includes)
         code += "#include <" + include + ">\n";
 
-    // Iterate through code lines
     std::vector<int> indentationLevels;
     indentationLevels.push_back(0);
-    int typeDefLevel = 0;
 
+    std::vector<int> typeDefLevels;
+    typeDefLevels.push_back(0);
+
+    // Iterate through code lines
     for (CodeLine codeLine : m_lines)
         // Get the code of this line
         std::string line = codeLine.code;
@@ -84,23 +97,17 @@ std::string Compiler::compile(void) const
         else
             // Lower indentation level
             while (codeLine.indentation < indentationLevels.back())
-                if (indentationLevels.size() == typeDefLevel)
-                    code += "};\n";
-                    typeDefLevel = 0;
-                else
-                    code += "}\n";
+                _endScope(code, indentationLevels, typeDefLevels);
 
-                indentationLevels.pop_back();
-
-        if (regexMatch(line, `(?:class|struct|enum)\s+\w+`).success())
-            typeDefLevel = indentationLevels.size() + 1;
+        // Beginning of a type definition
+        if (regexMatch(line, `(?:(?:private|protected|public)\s*:\s*)?(?:class|struct|enum)\s+\w+`).success())
+            typeDefLevels.push_back(indentationLevels.size() + 1);
 
         // TODO: Further line processing
 
         // Put literal values back
         for (std::pair<std::string, Literal> lit : m_literals)
             replaceAllInPlace(line, lit.first, lit.second.value());
-
 
         // If a line ends with a backslash, the next line is supposed to be appended to it
         if (line.back() == '\\')
@@ -115,8 +122,7 @@ std::string Compiler::compile(void) const
 
     // Terminate all the remaining scopes
     while (indentationLevels.size() > 1)
-        code += "}\n";
-        indentationLevels.pop_back();
+        _endScope(code, indentationLevels, typeDefLevels);
 
     return code;
 
