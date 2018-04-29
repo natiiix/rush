@@ -5,7 +5,6 @@
 #include "RegexMatch.h.rush"
 
 namespace support
-
     void printLn(const std::string str);
     void printLnErr(const std::string str);
     void printLnWarn(const std::string str);
