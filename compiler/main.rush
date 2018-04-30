@@ -43,7 +43,7 @@ int main(const int argc, const char *const argv[])
     // Open the temporary file
     log("Creating a temporary file");
 
-    const std::string tmpPath = srcPath + ".tmp.cpp";
+    const std::string tmpPath = srcPath + ".cpp";
 
     std::ofstream tmpFile(tmpPath);
 
