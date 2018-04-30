@@ -31,9 +31,42 @@ void Compiler::loadFile(const std::string path)
     if (!file)
         throw std::runtime_error("Unable to open file for reading");
 
+    // Read source file lines
+    std::string multiLine;
+    int multiLineStart;
+
     int lineCounter = 1;
     for (std::string line; getline(file, line); lineCounter++)
-        processLine(line, path, lineCounter);
+        // Check if the line ends with a backslash
+        // Backslash means that the next line is supposed to be appended to this one
+        RegexMatch match = regexMatch(line, `(.*)\\\s*`);
+
+        // Multi-line
+        if (match.success())
+            std::string beforeBackslash = match[0];
+
+            // Subsequent lines
+            if (multiLineStart)
+                multiLine += beforeBackslash.substr(getIndentation(beforeBackslash));
+            // The first line of the multi-line
+            else
+                multiLine = beforeBackslash;
+                multiLineStart = lineCounter;
+        // Regular single line, but the previous lines were a multi-line
+        else if (multiLineStart)
+            multiLine += line.substr(getIndentation(line));
+            processLine(multiLine, path, multiLineStart);
+
+            multiLineStart = 0;
+            multiLine.clear();
+        // Regular singtle line and so was the previous line
+        else
+            processLine(line, path, lineCounter);
+
+    // Trailing multi-line at the end of a file
+    // This should not really happen, but just to be safe
+    if (multiLineStart)
+        processLine(multiLine, path, multiLineStart);
 
     printLn(`File loaded: "` + path + `"`);
 
