@@ -15,7 +15,7 @@ if (Test-Path -Path $newPath) {
 }
 
 if ($oldExists) {
-    & $oldPath $newPath ".\compiler\main.rush" --keep
+    & $oldPath ".\compiler\main.rush" --keep --origin -o $newPath
 }
 else {
     Write-Error -Message "No Rush compiler available!"
