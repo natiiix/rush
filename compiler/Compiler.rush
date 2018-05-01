@@ -12,11 +12,8 @@ using namespace support;
 Compiler::Compiler(const std::string mainSourcePath)
     loadFile(mainSourcePath);
 
-// To be potentially used in the future to tell the user the origin of an error
-// std::string getLineIdentifier(const std::string sourcePath, const int lineNumber)
-// {
-//     return " (" + sourcePath + " : " + std::to_string(lineNumber) + ")";
-// }
+std::string getOriginStr(const CodeLine line)
+    return "// " + line.origin + " : " + std::to_string(line.number) + '\n';
 
 void Compiler::loadFile(const std::string path)
     if (contains(m_loadedFiles, path))
@@ -39,7 +36,8 @@ void Compiler::loadFile(const std::string path)
     for (std::string line; getline(file, line); lineCounter++)
         // Check if the line ends with a backslash
         // Backslash means that the next line is supposed to be appended to this one
-        RegexMatch match = regexMatch(line, `(.*)\\\s*`);
+        // If there is a comment at the end of the line, remove it
+        RegexMatch match = regexMatch(line, `(.*)\\\s*(?://.*)?`);
 
         // Multi-line
         if (match.success())
@@ -105,7 +103,7 @@ std::string Compiler::addLiteral(const Literal value)
 
     return name;
 
-std::string Compiler::compile(void) const
+std::string Compiler::compile(const bool originMode) const
     std::string code;
 
     // Include headers
@@ -136,22 +134,16 @@ std::string Compiler::compile(void) const
         if (regexMatch(line, `(?:(?:private|protected|public)\s*:\s*)?(?:class|struct|enum)\s+\w+`).success())
             typeDefLevels.push_back(indentationLevels.size() + 1);
 
-        // TODO: Further line processing
-
         // Put literal values back
         for (std::pair<std::string, Literal> lit : m_literals)
             replaceAllInPlace(line, lit.first, lit.second.value());
 
-        // If a line ends with a backslash, the next line is supposed to be appended to it
-        if (line.back() == '\\')
-            line.pop_back();
+        // Add the origin of the line above the line
+        if (originMode)
+            code += getOriginStr(codeLine);
 
-        // Regular lines have a newline character at the end
-        else
-            line += '\n';
-
-        // Append the line to the code
-        code += line;
+        // Append the line to the code and add a newline
+        code += line + '\n';
 
     // Terminate all the remaining scopes
     while (indentationLevels.size() > 1)
