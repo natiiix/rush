@@ -14,87 +14,87 @@ using namespace support;
 
 int main(const int argc, const char *const argv[])
     // Not enough arguments
-    if (argc < 3)
-        printLn("Syntax: rush <Output File> <Main Source File> [--keep] [C++ Compiler Arguments]");
+    if (argc < 2)
+        printLn("Syntax: rush <Main Rush Source File> [--keep] [--origin] [--cpp] [C++ Compiler Arguments]");
         return -1;
 
-    log("Loading source files");
+    // Process command line arguments
+    std::string sourcePath = normalizePath(argv[1]);
 
-    // Get the main source file's path
-    const std::string srcPath = normalizePath(argv[2]);
+    bool keepMode = false;
+    bool originMode = false;
+    bool cppMode = false;
 
-    // Create a compiler
-    const Compiler comp(srcPath);
+    std::string cppArgs;
 
-    ok();
+    for (int i = 2; i < argc; i++)
+        const std::string arg = argv[i];
 
-    log("Compiling the source files into a temporary code");
-
-    // Compile the source files into temporary code
-    const std::string tempCode = comp.compile();
-
-    // Compile error occurred
-    if (tempCode.empty())
-        printLnErr("Unable to compile the source files");
-        return -1;
-
-    ok();
-
-    // Open the temporary file
-    log("Creating a temporary file");
-
-    const std::string tmpPath = srcPath + ".tmp.cpp";
-
-    std::ofstream tmpFile(tmpPath);
-
-    // Check if the temporary file has been correctly opened
-    if (!tmpFile.is_open())
-        printLnErr("Unable to create a temporary file");
-        return -1;
-
-    // Write the temporary code to the temporary file
-    tmpFile << tempCode;
-
-    // Close the temporary file
-    tmpFile.close();
-
-    ok();
-
-    // Process optional arguments
-    bool deleteTmpFile = true;
-    std::string compilerArgs;
-
-    for (int i = 3; i < argc; i++)
-        std::string arg = argv[i];
-
-        if (i == 3 && arg == "--keep")
-            deleteTmpFile = false;
+        if (arg == "--keep")
+            keepMode = true;
+        else if (arg == "--origin")
+            originMode = true;
+        else if (arg == "--cpp")
+            cppMode = true;
         else
-            compilerArgs += " " + wrapInQuotesIfContainsSpace(arg);
+            cppArgs += wrapInQuotesIfContainsSpace(arg) + ' ';
 
-    // Compile the temporary file
-    log("Compiling the temporary code into a binary executable");
+    // Instantiate the compiler by loading the source files
+    log("Loading the Rush source code");
+    const Compiler comp(sourcePath);
+    ok();
 
-    std::string compileCmd = "c++ -o " + wrapInQuotesIfContainsSpace(argv[1]) + " " + wrapInQuotesIfContainsSpace(tmpPath) + compilerArgs;
+    // Compile Rush code into C++ code
+    log("Compiling the Rush source code into C++ code");
+    const std::string cppCode = comp.compile(originMode);
 
-    if (system(compileCmd.c_str()))
-        printLnErr("Unable to compile the temporary code");
+    // Compiler is unable to process the Rush code
+    if (cppCode.empty())
+        printLnErr("Unable to compile the Rush source code");
         return -1;
 
     ok();
 
-    // Delete the temporary file unless the user has specified they want to keep it
-    if (deleteTmpFile)
-        log("Deleting the temporary file");
+    // Open a .cpp file and store the compiled C++ code in it
+    log("Creating .cpp file to store the C++ code");
 
-        if (remove(tmpPath.c_str()))
-            printLnErr("Unable to delete the temporary file");
+    const std::string cppPath = sourcePath + ".cpp";
+    std::ofstream cppFile(cppPath);
+
+    // Check if the .cpp file has been correctly opened
+    if (!cppFile.is_open())
+        printLnErr("Unable to create a .cpp file (" + cppPath + ")");
+        return -1;
+
+    // Write the C++ code to the .cpp file
+    cppFile << cppCode;
+
+    // Close the C++ file
+    cppFile.close();
+
+    ok();
+
+    // Compile the C++ code using a C++ compiler
+    if (!cppMode)
+        log("Compiling the C++ code into binary");
+
+        std::string cppCmd = "c++ " + cppArgs + wrapInQuotesIfContainsSpace(cppPath);
+
+        if (system(cppCmd.c_str()))
+            printLnErr("Unable to compile the C++ code");
             return -1;
 
         ok();
-    else
-        log("Keeping the temporary file");
-        ok();
+
+        // Delete the C++ file unless in --cpp / --keep mode
+        if (!keepMode)
+            log("Deleting the C++ file");
+
+            if (remove(cppPath.c_str()))
+                printLnErr("Unable to delete the C++ file");
+                return -1;
+
+            ok();
 
     // Everything worked correctly
     return 0;
