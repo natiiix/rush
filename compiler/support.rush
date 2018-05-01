@@ -1,9 +1,13 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <chrono>
 #include "support.h.rush"
 
 namespace support
+
+    // Get compilation start time
+    const std::chrono::system_clock::time_point START_TIME = std::chrono::system_clock::now();
 
     void printLn(const std::string str)
         std::cout << str << std::endl;
@@ -18,7 +22,8 @@ namespace support
         std::cout << str << " ..." << std::endl;
 
     void ok(void)
-        printLn("+++ OK");
+        std::chrono::duration<double> duration = std::chrono::system_clock::now() - START_TIME;
+        printLn("+++ OK (" + std::to_string(duration.count()) + " seconds)");
 
     std::vector<RegexMatch> getAllMatches(const std::regex reg, const std::string str)
         std::vector<RegexMatch> matches;
