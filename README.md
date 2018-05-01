@@ -7,7 +7,30 @@ Please note that since version v1.0.1 the Rush compiler is also written in the R
 
 # Syntax
 ```
-rush <Output File> <Main Source File> [--keep] [C++ Compiler Arguments]
+rush <Main Rush Source File> [--keep] [--origin] [--cpp] [C++ Compiler Arguments]
+```
+## Compiler options
+| Option | Description |
+| ------------:|:----------- |
+| `--keep` | **Keep the C++ file after a successful compilation to binary.**<br><br>This option has no effect if the `--cpp` option is enabled. |
+| `--origin` | **Include the origin (source file, line number) of each line in the C++ file.**<br><br>The origin is written as a comment above the respective line.<br>This option is meant to ease the process of locating errors in Rush code. |
+| `--cpp` | **Only compile the Rush source code to C++ code.**<br><br>The C++ file will be located in the same directory as the main source file<br>and it will have its name with `.cpp` appended to it<br><br>The C++ code will NOT be compiled to binary.<br>Using the `--keep` option is not necessary.<br><br>This option can be used to generate C++ code,<br>which can be then compiled to binary on a different platform. |
+## Output binary file path
+To specify the path of the output binary file, you have to use the `-o` option of the C++ compiler (GCC). See the examples below or [the official GCC documentation](https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html) for more information.
+## Examples
+Compile into binary file with a name chosen by the C++ compiler (`a.exe` on Windows, `a.out` on Linux) and delete the C++ file.
+```
+rush HelloWorld.rush
+```
+
+Compile into binary file called `HelloWorld.exe`, insert line origin information into the C++ code and keep the C++ file.
+```
+rush HelloWorld.rush --keep --origin -o HelloWorld.exe
+```
+
+Compile into C++ code and keep the C++ file. This C++ file will be called `HelloWorld.rush.cpp` in this example.
+```
+rush HelloWorld.rush --cpp
 ```
 # Download
 The Rush compiler is currently only available for Microsoft Windows.
