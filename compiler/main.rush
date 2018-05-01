@@ -33,9 +33,9 @@ int main(const int argc, const char *const argv[])
         if (arg == "--keep")
             keepMode = true;
         else if (arg == "--origin")
-            originMode = false;
+            originMode = true;
         else if (arg == "--cpp")
-            cppMode = false;
+            cppMode = true;
         else
             cppArgs += wrapInQuotesIfContainsSpace(arg) + ' ';
 
