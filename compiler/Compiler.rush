@@ -131,7 +131,7 @@ std::string Compiler::compile(const bool originMode) const
                 _endScope(code, indentationLevels, typeDefLevels);
 
         // Beginning of a type definition
-        if (regexMatch(line, `(?:(?:private|protected|public)\s*:\s*)?(?:class|struct|enum)\s+\w+(?:\s*:\s*(?:\w+::)*\w+)?`).success())
+        if (regexMatch(line, `(?:(?:private|protected|public)\s*:\s*)?(?:class|struct|enum)\s+\w+(?:\s*:(?:\s*(?:private|protected|public))?\s*(?:\w+::)*\w+)?`).success())
             typeDefLevels.push_back(indentationLevels.size() + 1);
 
         // Put literal values back
