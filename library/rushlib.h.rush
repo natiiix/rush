@@ -1,1 +1,8 @@
-namespace rush {}
+#include <string>
+
+namespace rush
+    class String : public std::string
+        public: String(const char *const str) : std::string(str) {}
+        public: String(const std::string str) : std::string(str) {}
+        public: bool StartsWith(const String str) const;
+        public: bool EndsWith(const String str) const;
