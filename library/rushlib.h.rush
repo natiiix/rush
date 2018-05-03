@@ -8,6 +8,9 @@ namespace rush
         public: bool StartsWith(const String str) const;
         public: bool EndsWith(const String str) const;
 
+    class Match : public std::smatch
+        public: Match(const std::smatch match) : std::smatch(match) {}
+
     class Regex : public std::regex
         public: Regex(const char *const pattern) : std::regex(pattern) {}
         public: Regex(const std::string pattern) : std::regex(pattern) {}
