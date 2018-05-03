@@ -1,5 +1,6 @@
 #include <string>
 #include <regex>
+#include <vector>
 
 namespace rush
     class String : public std::string
@@ -7,6 +8,10 @@ namespace rush
         public: String(const std::string str) : std::string(str) {}
         public: bool StartsWith(const String str) const;
         public: bool EndsWith(const String str) const;
+
+    template <class T>
+    class List : public std::vector<T>
+        public: List<T>(const std::vector<T> vector) : std::vector<T>(vector) {}
 
     class RegexMatch : public std::smatch
         public: RegexMatch(const std::smatch match) : std::smatch(match) {}
