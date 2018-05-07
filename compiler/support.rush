@@ -7,259 +7,259 @@
 namespace support
 
     // Get compilation start time
-    const std::chrono::system_clock::time_point START_TIME = std::chrono::system_clock::now();
+    const std::chrono::system_clock::time_point START_TIME = std::chrono::system_clock::now()
 
     void printLn(const std::string str)
-        std::cout << str << std::endl;
+        std::cout << str << std::endl
 
     void printLnErr(const std::string str)
-        std::cerr << "!!! ERROR: " << str << std::endl;
+        std::cerr << "!!! ERROR: " << str << std::endl
 
     void printLnWarn(const std::string str)
-        std::cerr << "*** WARNING: " << str << std::endl;
+        std::cerr << "*** WARNING: " << str << std::endl
 
     void log(const std::string str)
-        std::cout << str << " ..." << std::endl;
+        std::cout << str << " ..." << std::endl
 
     void ok(void)
-        std::chrono::duration<double> duration = std::chrono::system_clock::now() - START_TIME;
-        printLn("+++ OK (" + std::to_string(duration.count()) + " seconds)");
+        std::chrono::duration<double> duration = std::chrono::system_clock::now() - START_TIME
+        printLn("+++ OK (" + std::to_string(duration.count()) + " seconds)")
 
     std::vector<RegexMatch> getAllMatches(const std::regex reg, const std::string str)
-        std::vector<RegexMatch> matches;
+        std::vector<RegexMatch> matches
 
-        const std::sregex_iterator end;
+        const std::sregex_iterator end
         for std::sregex_iterator iter(str.begin(), str.end(), reg); iter != end; ++iter
-            matches.push_back(RegexMatch(*iter));
+            matches.push_back(RegexMatch(*iter))
 
-        return matches;
+        return matches
 
     std::vector<RegexMatch> getAllMatches(const std::string reg, const std::string str)
-        return getAllMatches(std::regex(reg), str);
+        return getAllMatches(std::regex(reg), str)
 
     RegexMatch regexMatch(const std::string str, const std::string regex)
-        std::smatch match;
-        bool success = std::regex_match(str, match, std::regex(regex));
+        std::smatch match
+        bool success = std::regex_match(str, match, std::regex(regex))
 
-        return RegexMatch(match);
+        return RegexMatch(match)
 
     RegexMatch regexSearch(const std::string str, const std::string regex)
-        std::smatch match;
-        bool success = std::regex_search(str, match, std::regex(regex));
+        std::smatch match
+        bool success = std::regex_search(str, match, std::regex(regex))
 
-        return RegexMatch(match);
+        return RegexMatch(match)
 
     std::string regexReplace(const std::string str, const std::string regex, const std::string replacement)
-        return std::regex_replace(str, std::regex(regex), replacement);
+        return std::regex_replace(str, std::regex(regex), replacement)
 
     void regexReplaceInPlace(std::string &str, const std::string regex, const std::string replacement)
-        str = regexReplace(str, regex, replacement);
+        str = regexReplace(str, regex, replacement)
 
     bool isWhitespace(const char c)
-        return c == ' ' || c == '\t';
+        return c == ' ' || c == '\t'
 
     int getIndentation(const std::string str)
         for int i = 0; i < str.size(); i++
             if !isWhitespace(str[i])
-                return i;
+                return i
 
-        return str.size();
+        return str.size()
 
     // Source: https://stackoverflow.com/a/2602258/3043260
     std::string readFile(const char *const path)
         // File must be open in binary mode for tellg() to work
-        std::ifstream reader(path, std::ifstream::binary);
+        std::ifstream reader(path, std::ifstream::binary)
 
         // Check if the stream is open
         if !reader
-            return std::string();
+            return std::string()
 
         // Go to end
-        reader.seekg(0, std::ios::end);
+        reader.seekg(0, std::ios::end)
 
         // Get the distance from the beginning of the file
-        size_t size = reader.tellg();
+        size_t size = reader.tellg()
 
         // Go to beginning
-        reader.seekg(0, std::ios::beg);
+        reader.seekg(0, std::ios::beg)
 
         // Create a string and copy the file contents into it
-        std::string buffer(size, '\0');
-        reader.read(&buffer[0], size);
+        std::string buffer(size, '\0')
+        reader.read(&buffer[0], size)
 
         // Close the stream (optional)
-        reader.close();
+        reader.close()
 
-        return buffer;
+        return buffer
 
     // Source: https://stackoverflow.com/a/24315631/3043260
     void replaceAllInPlace(std::string &str, const std::string &from, const std::string &to)
         // Cannot replace an empty string
         if from.empty()
-            return;
+            return
 
-        size_t start_pos = 0;
+        size_t start_pos = 0
         while (start_pos = str.find(from, start_pos)) != std::string::npos
-            str.replace(start_pos, from.length(), to);
-            start_pos += to.length();
+            str.replace(start_pos, from.length(), to)
+            start_pos += to.length()
 
     void replaceAllInPlace(std::string &str, const char from, const char to)
         for int i = 0; i < str.size(); i++
             if str[i] == from
-                str[i] = to;
+                str[i] = to
 
     std::string replaceAll(const std::string &str, const std::string &from, const std::string &to)
-        std::string newStr = str;
-        replaceAllInPlace(newStr, from, to);
-        return newStr;
+        std::string newStr = str
+        replaceAllInPlace(newStr, from, to)
+        return newStr
 
     std::string replaceAll(const std::string &str, const char from, const char to)
-        std::string newStr;
+        std::string newStr
 
         for int i = 0; i < newStr.size(); i++
             if newStr[i] == from
-                newStr[i] = to;
+                newStr[i] = to
 
-        return newStr;
+        return newStr
 
     // Source: https://stackoverflow.com/a/14267455/3043260
     std::vector<std::string> split(const std::string str, const std::string delimiter)
-        std::vector<std::string> tokens;
+        std::vector<std::string> tokens
 
-        size_t start = 0;
-        size_t end = str.find(delimiter);
+        size_t start = 0
+        size_t end = str.find(delimiter)
         while end != std::string::npos
-            tokens.push_back(str.substr(start, end - start));
+            tokens.push_back(str.substr(start, end - start))
 
-            start = end + delimiter.length();
-            end = str.find(delimiter, start);
+            start = end + delimiter.length()
+            end = str.find(delimiter, start)
 
-        tokens.push_back(str.substr(start, end));
+        tokens.push_back(str.substr(start, end))
 
-        return tokens;
+        return tokens
 
 
     // Source: https://stackoverflow.com/a/1430774/3043260
     std::string join(const std::string separator, const std::vector<std::string> values, const bool trailingSeparator)
-        std::stringstream ss;
+        std::stringstream ss
 
         for size_t i = 0; i < values.size(); i++
-            ss << values[i];
+            ss << values[i]
 
             if trailingSeparator || i + 1 < values.size()
-                ss << separator;
+                ss << separator
 
-        return ss.str();
+        return ss.str()
 
 
     bool isEscaped(const std::string str, const int index)
-        bool escaped = false;
+        bool escaped = false
 
         for int i = index - 1; index >= 0; i--
             if str[i] == '\\'
-                escaped = !escaped;
+                escaped = !escaped
             else
-                break;
+                break
 
-        return escaped;
+        return escaped
 
 
     int findUnescaped(const std::string str, const char value, const int start)
-        bool escaped = false;
+        bool escaped = false
 
         for int i = start; i < str.size(); i++
-            char c = str[i];
+            char c = str[i]
 
             if escaped
-                escaped = false;
+                escaped = false
             else if c == value
-                return i;
+                return i
             else if c == '\\'
-                escaped = true;
+                escaped = true
 
-        return -1;
+        return -1
 
     bool startsWith(const std::string str, const std::string value)
         if str.size() < value.size()
-            return false;
+            return false
 
         for int i = 0; i < value.size(); i++
             if str[i] != value[i]
-                return false;
+                return false
 
-        return true;
+        return true
 
     int indexOfFirst(const std::string str, const std::string value)
         if value.size() < str.size()
-            return -1;
+            return -1
 
         for int i = 0; i < str.size() - value.size() + 1; i++
-            bool equals = true;
+            bool equals = true
 
             for int j = 0; j < value.size(); j++
                 if str[i + j] != value[j]
-                    equals = false;
-                    break;
+                    equals = false
+                    break
 
             if equals
-                return i;
+                return i
 
-        return -1;
+        return -1
 
     int indexOfFirst(const std::string str, const char value)
         for int i = 0; i < str.size(); i++
             if str[i] == value
-                return i;
+                return i
 
-        return -1;
+        return -1
 
     bool contains(const std::string str, const std::string value)
-        return indexOfFirst(str, value) >= 0;
+        return indexOfFirst(str, value) >= 0
 
     bool contains(const std::string str, const char value)
-        return indexOfFirst(str, value) >= 0;
+        return indexOfFirst(str, value) >= 0
 
     std::string normalizePath(const std::string path)
-        std::string newPath = path;
+        std::string newPath = path
 
         // Convert Windows path separators to UNIX ones
-        replaceAllInPlace(newPath, '\\', '/');
+        replaceAllInPlace(newPath, '\\', '/')
 
         // Remove duplicit slashes
-        regexReplaceInPlace(newPath, "/{2,}", "/");
+        regexReplaceInPlace(newPath, "/{2,}", "/")
         // Remove "this directory" pointers
-        regexReplaceInPlace(newPath, `(^|/)\./`, "$1");
+        regexReplaceInPlace(newPath, `(^|/)\./`, "$1")
         // Remove unnecessary "parent directory" pointers
-        regexReplaceInPlace(newPath, `[^/]+/\.\./`, "");
+        regexReplaceInPlace(newPath, `[^/]+/\.\./`, "")
 
-        return newPath;
+        return newPath
 
     std::string getPathRelativeTo(const std::string relativeTo, const std::string path)
         // Return the path if either of the paths is empty or if the path is absolute
         if !relativeTo.size() || !path.size() || path.front() == '/'
-            return path;
+            return path
 
-        std::string newPath = relativeTo;
+        std::string newPath = relativeTo
 
         // Remove the file name from the path we append to
         while newPath.size() && newPath.back() != '/' && newPath.back() != '\\'
-            newPath.pop_back();
+            newPath.pop_back()
 
-        newPath += path;
+        newPath += path
 
-        return normalizePath(newPath);
+        return normalizePath(newPath)
 
     std::string wrapInQuotes(const std::string str)
-        return '\"' + str + '\"';
+        return '\"' + str + '\"'
 
     std::string wrapInQuotesIfContainsSpace(const std::string str)
         if contains(str, ' ')
-            return wrapInQuotes(str);
+            return wrapInQuotes(str)
         else
-            return str;
+            return str
 
     std::string replaceAt(const std::string str, const int start, const int length, const std::string replacement)
-        std::string prefix = str.substr(0, start);
-        std::string suffix = str.substr(start + length);
+        std::string prefix = str.substr(0, start)
+        std::string suffix = str.substr(start + length)
 
-        return prefix + replacement + suffix;
+        return prefix + replacement + suffix
