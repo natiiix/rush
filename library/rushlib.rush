@@ -1,2 +1,3 @@
 #include "rushlib.h.rush"
 #include "String.rush"
+#include "Regex.rush"
