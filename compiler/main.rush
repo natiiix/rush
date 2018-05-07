@@ -14,7 +14,7 @@ using namespace support;
 
 int main(const int argc, const char *const argv[])
     // Not enough arguments
-    if (argc < 2)
+    if argc < 2
         printLn("Syntax: rush <Main Rush Source File> [--keep] [--origin] [--cpp] [C++ Compiler Arguments]");
         return -1;
 
@@ -27,14 +27,14 @@ int main(const int argc, const char *const argv[])
 
     std::string cppArgs;
 
-    for (int i = 2; i < argc; i++)
+    for int i = 2; i < argc; i++
         const std::string arg = argv[i];
 
-        if (arg == "--keep")
+        if arg == "--keep"
             keepMode = true;
-        else if (arg == "--origin")
+        else if arg == "--origin"
             originMode = true;
-        else if (arg == "--cpp")
+        else if arg == "--cpp"
             cppMode = true;
         else
             cppArgs += wrapInQuotesIfContainsSpace(arg) + ' ';
@@ -49,7 +49,7 @@ int main(const int argc, const char *const argv[])
     const std::string cppCode = comp.compile(originMode);
 
     // Compiler is unable to process the Rush code
-    if (cppCode.empty())
+    if cppCode.empty()
         printLnErr("Unable to compile the Rush source code");
         return -1;
 
@@ -62,7 +62,7 @@ int main(const int argc, const char *const argv[])
     std::ofstream cppFile(cppPath);
 
     // Check if the .cpp file has been correctly opened
-    if (!cppFile.is_open())
+    if !cppFile.is_open()
         printLnErr("Unable to create a .cpp file (" + cppPath + ")");
         return -1;
 
@@ -75,22 +75,22 @@ int main(const int argc, const char *const argv[])
     ok();
 
     // Compile the C++ code using a C++ compiler
-    if (!cppMode)
+    if !cppMode
         log("Compiling the C++ code into binary");
 
         std::string cppCmd = "c++ " + cppArgs + wrapInQuotesIfContainsSpace(cppPath);
 
-        if (system(cppCmd.c_str()))
+        if system(cppCmd.c_str())
             printLnErr("Unable to compile the C++ code");
             return -1;
 
         ok();
 
         // Delete the C++ file unless in --cpp / --keep mode
-        if (!keepMode)
+        if !keepMode
             log("Deleting the C++ file");
 
-            if (remove(cppPath.c_str()))
+            if remove(cppPath.c_str())
                 printLnErr("Unable to delete the C++ file");
                 return -1;
 

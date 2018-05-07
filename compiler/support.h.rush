@@ -45,7 +45,7 @@ namespace support
 
     template <class T>
     std::vector<T> toVector(const T arr[], const int length)
-        if (length < 0)
+        if length < 0
             return nullptr;
 
         std::vector<T> vec(arr, arr + length);
@@ -53,8 +53,8 @@ namespace support
 
     template <class T>
     int indexOfFirst(const std::vector<T> vect, const T value)
-        for (int i = 0; i < vect.size(); i++)
-            if (vect[i] == value)
+        for int i = 0; i < vect.size(); i++
+            if vect[i] == value
                 return i;
 
         return -1;

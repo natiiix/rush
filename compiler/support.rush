@@ -29,7 +29,7 @@ namespace support
         std::vector<RegexMatch> matches;
 
         const std::sregex_iterator end;
-        for (std::sregex_iterator iter(str.begin(), str.end(), reg); iter != end; ++iter)
+        for std::sregex_iterator iter(str.begin(), str.end(), reg); iter != end; ++iter
             matches.push_back(RegexMatch(*iter));
 
         return matches;
@@ -59,8 +59,8 @@ namespace support
         return c == ' ' || c == '\t';
 
     int getIndentation(const std::string str)
-        for (int i = 0; i < str.size(); i++)
-            if (!isWhitespace(str[i]))
+        for int i = 0; i < str.size(); i++
+            if !isWhitespace(str[i])
                 return i;
 
         return str.size();
@@ -71,7 +71,7 @@ namespace support
         std::ifstream reader(path, std::ifstream::binary);
 
         // Check if the stream is open
-        if (!reader)
+        if !reader
             return std::string();
 
         // Go to end
@@ -95,17 +95,17 @@ namespace support
     // Source: https://stackoverflow.com/a/24315631/3043260
     void replaceAllInPlace(std::string &str, const std::string &from, const std::string &to)
         // Cannot replace an empty string
-        if (from.empty())
+        if from.empty()
             return;
 
         size_t start_pos = 0;
-        while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+        while (start_pos = str.find(from, start_pos)) != std::string::npos
             str.replace(start_pos, from.length(), to);
             start_pos += to.length();
 
     void replaceAllInPlace(std::string &str, const char from, const char to)
-        for (int i = 0; i < str.size(); i++)
-            if (str[i] == from)
+        for int i = 0; i < str.size(); i++
+            if str[i] == from
                 str[i] = to;
 
     std::string replaceAll(const std::string &str, const std::string &from, const std::string &to)
@@ -116,8 +116,8 @@ namespace support
     std::string replaceAll(const std::string &str, const char from, const char to)
         std::string newStr;
 
-        for (int i = 0; i < newStr.size(); i++)
-            if (newStr[i] == from)
+        for int i = 0; i < newStr.size(); i++
+            if newStr[i] == from
                 newStr[i] = to;
 
         return newStr;
@@ -128,7 +128,7 @@ namespace support
 
         size_t start = 0;
         size_t end = str.find(delimiter);
-        while (end != std::string::npos)
+        while end != std::string::npos
             tokens.push_back(str.substr(start, end - start));
 
             start = end + delimiter.length();
@@ -143,10 +143,10 @@ namespace support
     std::string join(const std::string separator, const std::vector<std::string> values, const bool trailingSeparator)
         std::stringstream ss;
 
-        for (size_t i = 0; i < values.size(); i++)
+        for size_t i = 0; i < values.size(); i++
             ss << values[i];
 
-            if (trailingSeparator || i + 1 < values.size())
+            if trailingSeparator || i + 1 < values.size()
                 ss << separator;
 
         return ss.str();
@@ -155,8 +155,8 @@ namespace support
     bool isEscaped(const std::string str, const int index)
         bool escaped = false;
 
-        for (int i = index - 1; index >= 0; i--)
-            if (str[i] == '\\')
+        for int i = index - 1; index >= 0; i--
+            if str[i] == '\\'
                 escaped = !escaped;
             else
                 break;
@@ -167,48 +167,48 @@ namespace support
     int findUnescaped(const std::string str, const char value, const int start)
         bool escaped = false;
 
-        for (int i = start; i < str.size(); i++)
+        for int i = start; i < str.size(); i++
             char c = str[i];
 
-            if (escaped)
+            if escaped
                 escaped = false;
-            else if (c == value)
+            else if c == value
                 return i;
-            else if (c == '\\')
+            else if c == '\\'
                 escaped = true;
 
         return -1;
 
     bool startsWith(const std::string str, const std::string value)
-        if (str.size() < value.size())
+        if str.size() < value.size()
             return false;
 
-        for (int i = 0; i < value.size(); i++)
-            if (str[i] != value[i])
+        for int i = 0; i < value.size(); i++
+            if str[i] != value[i]
                 return false;
 
         return true;
 
     int indexOfFirst(const std::string str, const std::string value)
-        if (value.size() < str.size())
+        if value.size() < str.size()
             return -1;
 
-        for (int i = 0; i < str.size() - value.size() + 1; i++)
+        for int i = 0; i < str.size() - value.size() + 1; i++
             bool equals = true;
 
-            for (int j = 0; j < value.size(); j++)
-                if (str[i + j] != value[j])
+            for int j = 0; j < value.size(); j++
+                if str[i + j] != value[j]
                     equals = false;
                     break;
 
-            if (equals)
+            if equals
                 return i;
 
         return -1;
 
     int indexOfFirst(const std::string str, const char value)
-        for (int i = 0; i < str.size(); i++)
-            if (str[i] == value)
+        for int i = 0; i < str.size(); i++
+            if str[i] == value
                 return i;
 
         return -1;
@@ -236,13 +236,13 @@ namespace support
 
     std::string getPathRelativeTo(const std::string relativeTo, const std::string path)
         // Return the path if either of the paths is empty or if the path is absolute
-        if (!relativeTo.size() || !path.size() || path.front() == '/')
+        if !relativeTo.size() || !path.size() || path.front() == '/'
             return path;
 
         std::string newPath = relativeTo;
 
         // Remove the file name from the path we append to
-        while (newPath.size() && newPath.back() != '/' && newPath.back() != '\\')
+        while newPath.size() && newPath.back() != '/' && newPath.back() != '\\'
             newPath.pop_back();
 
         newPath += path;
@@ -253,7 +253,7 @@ namespace support
         return '\"' + str + '\"';
 
     std::string wrapInQuotesIfContainsSpace(const std::string str)
-        if (contains(str, ' '))
+        if contains(str, ' ')
             return wrapInQuotes(str);
         else
             return str;
