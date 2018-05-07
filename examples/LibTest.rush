@@ -1,0 +1,9 @@
+#include "../library/rushlib.h.rush"
+#include <iostream>
+
+int main(void)
+    rush::String str = "Hello World!";
+    std::cout << str << std::endl;
+    std::cout << str.StartsWith("Hello") << std::endl;
+    std::cout << str.EndsWith("World!") << std::endl;
+    return 0;
