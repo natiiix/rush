@@ -83,15 +83,15 @@ std::string Compiler::addLiteral(const Literal value)
     std::string strType;
 
     switch value.type()
-        case LiteralType::String:
+        case LiteralType::String
         strType = "STRING";
         break;
 
-        case LiteralType::Number:
+        case LiteralType::Number
         strType = "NUMBER";
         break;
 
-        default:
+        default
         strType = "UNKNOWN";
         break;
 
@@ -135,7 +135,10 @@ std::string Compiler::compile(const bool originMode) const
             typeDefLevels.push_back(indentationLevels.size() + 1);
 
         // Add parentheses to conditions and loops
-        regexReplaceInPlace(line, `^((?:else\s+)?if|for|while|switch)\s+(.+?)(\\s*{\s*\})?$`, "$1($2)$3");
+        regexReplaceInPlace(line, `^((?:else\s+)?if|for|while|switch)\s+(.+?)(\s*\{\s*\})?$`, "$1($2)$3");
+
+        // Add colons after switch cases
+        regexReplaceInPlace(line, "^(case .*|default)$", "$1:");
 
         // Put literal values back
         for std::pair<std::string, Literal> lit : m_literals
