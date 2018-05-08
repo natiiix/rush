@@ -1,27 +1,27 @@
 namespace rush
     bool String::StartsWith(const String str) const
-        const int strSize = str.size();
+        const int strSize = str.size()
 
-        if (strSize > size())
-            return false;
+        if strSize > size()
+            return false
 
-        for (int i = 0; i < strSize; i++)
-            if (str[i] != at(i))
-                return false;
+        for int i = 0; i < strSize; i++
+            if str[i] != at(i)
+                return false
 
         return true;
 
     bool String::EndsWith(const String str) const
-        const int strSize = str.size();
-        const int thisSize = size();
+        const int strSize = str.size()
+        const int thisSize = size()
 
-        if (strSize > thisSize)
-            return false;
+        if strSize > thisSize
+            return false
 
-        const int offset = thisSize - strSize;
+        const int offset = thisSize - strSize
 
-        for (int i = 0; i < strSize; i++)
-            if (str[i] != at(offset + i))
-                return false;
+        for int i = 0; i < strSize; i++
+            if str[i] != at(offset + i)
+                return false
 
-        return true;
+        return true

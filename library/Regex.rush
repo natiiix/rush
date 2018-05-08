@@ -1,22 +1,22 @@
 namespace rush
     RegexMatch Regex::Match(const String str) const
-        RegexMatch match;
-        std::regex_match(str, match, this);
-        return match;
+        RegexMatch match
+        std::regex_match(str, match, *this)
+        return match
 
     RegexMatch Regex::Search(const String str) const
-        RegexMatch match;
-        std::regex_search(str, match, this);
-        return match;
+        RegexMatch match
+        std::regex_search(str, match, *this)
+        return match
 
     String Regex::Replace(const String str, const String replacement) const
-        return std::regex_replace(str, this, replacement);
+        return std::regex_replace(str, *this, replacement)
 
     List<RegexMatch> Regex::FindAllMatches(const String str) const
         List<RegexMatch> matches;
 
         const std::sregex_iterator end;
-        for (std::sregex_iterator iter(str.begin(), str.end(), reg); iter != end; ++iter)
-            matches.push_back(Match(*iter));
+        for std::sregex_iterator iter(str.begin(), str.end(), *this); iter != end; ++iter
+            matches.push_back(RegexMatch(*iter))
 
         return matches;

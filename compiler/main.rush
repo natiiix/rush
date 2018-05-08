@@ -10,91 +10,91 @@
 #include "RegexMatch.rush"
 #include "support.rush"
 
-using namespace support;
+using namespace support
 
 int main(const int argc, const char *const argv[])
     // Not enough arguments
-    if (argc < 2)
-        printLn("Syntax: rush <Main Rush Source File> [--keep] [--origin] [--cpp] [C++ Compiler Arguments]");
-        return -1;
+    if argc < 2
+        printLn("Syntax: rush <Main Rush Source File> [--keep] [--origin] [--cpp] [C++ Compiler Arguments]")
+        return -1
 
     // Process command line arguments
-    std::string sourcePath = normalizePath(argv[1]);
+    std::string sourcePath = normalizePath(argv[1])
 
-    bool keepMode = false;
-    bool originMode = false;
-    bool cppMode = false;
+    bool keepMode = false
+    bool originMode = false
+    bool cppMode = false
 
-    std::string cppArgs;
+    std::string cppArgs
 
-    for (int i = 2; i < argc; i++)
-        const std::string arg = argv[i];
+    for int i = 2; i < argc; i++
+        const std::string arg = argv[i]
 
-        if (arg == "--keep")
-            keepMode = true;
-        else if (arg == "--origin")
-            originMode = true;
-        else if (arg == "--cpp")
-            cppMode = true;
+        if arg == "--keep"
+            keepMode = true
+        else if arg == "--origin"
+            originMode = true
+        else if arg == "--cpp"
+            cppMode = true
         else
-            cppArgs += wrapInQuotesIfContainsSpace(arg) + ' ';
+            cppArgs += wrapInQuotesIfContainsSpace(arg) + ' '
 
     // Instantiate the compiler by loading the source files
-    log("Loading the Rush source code");
-    const Compiler comp(sourcePath);
-    ok();
+    log("Loading the Rush source code")
+    const Compiler comp(sourcePath)
+    ok()
 
     // Compile Rush code into C++ code
-    log("Compiling the Rush source code into C++ code");
-    const std::string cppCode = comp.compile(originMode);
+    log("Compiling the Rush source code into C++ code")
+    const std::string cppCode = comp.compile(originMode)
 
     // Compiler is unable to process the Rush code
-    if (cppCode.empty())
-        printLnErr("Unable to compile the Rush source code");
-        return -1;
+    if cppCode.empty()
+        printLnErr("Unable to compile the Rush source code")
+        return -1
 
-    ok();
+    ok()
 
     // Open a .cpp file and store the compiled C++ code in it
-    log("Creating .cpp file to store the C++ code");
+    log("Creating .cpp file to store the C++ code")
 
-    const std::string cppPath = sourcePath + ".cpp";
-    std::ofstream cppFile(cppPath);
+    const std::string cppPath = sourcePath + ".cpp"
+    std::ofstream cppFile(cppPath)
 
     // Check if the .cpp file has been correctly opened
-    if (!cppFile.is_open())
-        printLnErr("Unable to create a .cpp file (" + cppPath + ")");
-        return -1;
+    if !cppFile.is_open()
+        printLnErr("Unable to create a .cpp file (" + cppPath + ")")
+        return -1
 
     // Write the C++ code to the .cpp file
-    cppFile << cppCode;
+    cppFile << cppCode
 
     // Close the C++ file
-    cppFile.close();
+    cppFile.close()
 
-    ok();
+    ok()
 
     // Compile the C++ code using a C++ compiler
-    if (!cppMode)
-        log("Compiling the C++ code into binary");
+    if !cppMode
+        log("Compiling the C++ code into binary")
 
-        std::string cppCmd = "c++ " + cppArgs + wrapInQuotesIfContainsSpace(cppPath);
+        std::string cppCmd = "c++ " + cppArgs + wrapInQuotesIfContainsSpace(cppPath)
 
-        if (system(cppCmd.c_str()))
-            printLnErr("Unable to compile the C++ code");
-            return -1;
+        if system(cppCmd.c_str())
+            printLnErr("Unable to compile the C++ code")
+            return -1
 
-        ok();
+        ok()
 
         // Delete the C++ file unless in --cpp / --keep mode
-        if (!keepMode)
-            log("Deleting the C++ file");
+        if !keepMode
+            log("Deleting the C++ file")
 
-            if (remove(cppPath.c_str()))
-                printLnErr("Unable to delete the C++ file");
-                return -1;
+            if remove(cppPath.c_str())
+                printLnErr("Unable to delete the C++ file")
+                return -1
 
-            ok();
+            ok()
 
     // Everything worked correctly
-    return 0;
+    return 0

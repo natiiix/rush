@@ -4,23 +4,27 @@
 
 namespace rush
     class String : public std::string
+        public: String(void) : std::string() {}
         public: String(const char *const str) : std::string(str) {}
         public: String(const std::string str) : std::string(str) {}
-        public: bool StartsWith(const String str) const;
-        public: bool EndsWith(const String str) const;
+        public: bool StartsWith(const String str) const
+        public: bool EndsWith(const String str) const
 
     template <class T>
     class List : public std::vector<T>
+        public: List<T>(void) : std::vector<T>() {}
         public: List<T>(const std::vector<T> vector) : std::vector<T>(vector) {}
 
     class RegexMatch : public std::smatch
+        public: RegexMatch(void) : std::smatch() {}
         public: RegexMatch(const std::smatch match) : std::smatch(match) {}
 
     class Regex : public std::regex
+        public: Regex(void) : std::regex() {}
         public: Regex(const char *const pattern) : std::regex(pattern) {}
         public: Regex(const std::string pattern) : std::regex(pattern) {}
         public: Regex(const std::regex regex) : std::regex(regex) {}
-        public: RegexMatch Match(const String str) const;
-        public: RegexMatch Search(const String str) const;
-        public: String Replace(const String str, const String replacement) const;
-        public: List<RegexMatch> FindAllMatches(const String str) const;
+        public: RegexMatch Match(const String str) const
+        public: RegexMatch Search(const String str) const
+        public: String Replace(const String str, const String replacement) const
+        public: List<RegexMatch> FindAllMatches(const String str) const

@@ -2,16 +2,16 @@
 
 enum LiteralType
     Number,
-    String
+    String,
 
 class Literal
     public:
     Literal(void) {}
-    Literal(const std::string value, const LiteralType type);
+    Literal(const std::string value, const LiteralType type)
 
-    const std::string value(void) const;
-    const LiteralType type(void) const;
+    const std::string value(void) const
+    const LiteralType type(void) const
 
     private:
-    std::string m_value;
-    LiteralType m_type;
+    std::string m_value
+    LiteralType m_type
