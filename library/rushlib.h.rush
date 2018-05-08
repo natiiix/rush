@@ -4,6 +4,7 @@
 
 namespace rush
     class String : public std::string
+        public: String(void) : std::string() {}
         public: String(const char *const str) : std::string(str) {}
         public: String(const std::string str) : std::string(str) {}
         public: bool StartsWith(const String str) const
@@ -11,12 +12,15 @@ namespace rush
 
     template <class T>
     class List : public std::vector<T>
+        public: List<T>(void) : std::vector<T>() {}
         public: List<T>(const std::vector<T> vector) : std::vector<T>(vector) {}
 
     class RegexMatch : public std::smatch
+        public: RegexMatch(void) : std::smatch() {}
         public: RegexMatch(const std::smatch match) : std::smatch(match) {}
 
     class Regex : public std::regex
+        public: Regex(void) : std::regex() {}
         public: Regex(const char *const pattern) : std::regex(pattern) {}
         public: Regex(const std::string pattern) : std::regex(pattern) {}
         public: Regex(const std::regex regex) : std::regex(regex) {}
