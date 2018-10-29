@@ -13,7 +13,7 @@ Compiler::Compiler(const std::string mainSourcePath)
     loadFile(mainSourcePath)
 
 std::string getOriginStr(const CodeLine line)
-    return "// " + line.origin + " : " + std::to_string(line.number) + '\n'
+    return "#line " + std::to_string(line.number) + " \"" + line.origin + "\"" + '\n'
 
 void Compiler::loadFile(const std::string path)
     if contains(m_loadedFiles, path)
